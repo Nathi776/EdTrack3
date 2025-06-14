@@ -1,0 +1,22 @@
+<h1>Lecturers</h1>
+<a href="{% url 'lecturer_create' %}">Add New Lecturer</a>
+<table border="1">
+    <tr>
+        <th>Staff Number</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Actions</th>
+    </tr>
+    {% for lecturer in lecturers %}
+    <tr>
+        <td>{{ lecturer.staffNumber }}</td>
+        <td>{{ lecturer.firstName }} {{ lecturer.lastName }}</td>
+        <td>{{ lecturer.email }}</td>
+        <td>
+            <a href="{% url 'lecturer_update' lecturer.staffNumber %}">Edit</a> |
+            <a href="{% url 'lecturer_delete' lecturer.staffNumber %}">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<a href="{% url 'home' %}">Back to home</a> 

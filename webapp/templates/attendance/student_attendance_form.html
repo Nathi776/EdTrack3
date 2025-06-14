@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Attendance</title>
+</head>
+<body>
+    <form method="post">
+    {% csrf_token %}
+    <label for="student_id">Student ID:</label>
+    <input type="text" id="student_id" name="student_id" required>
+    
+    <label for="subject_code">Subject Code:</label>
+    <input type="text" id="subject_code" name="subject_code" required>
+    
+    <button type="submit">Get Attendance</button>
+</form>
+</body>
+</html>

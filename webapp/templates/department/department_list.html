@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Department List</title>
+</head>
+<body>
+    <h1>Departments</h1>
+    <a href="{% url 'department_create' %}">Add Department</a>
+    <table border="1">
+        <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+        {% for department in departments %}
+        <tr>
+            <td>{{ department.D_Code }}</td>
+            <td>{{ department.D_Name }}</td>
+            <td>
+                <a href="{% url 'department_update' department.D_Code %}">Edit</a> |
+                <a href="{% url 'department_delete' department.D_Code %}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'home'%}">Back to home</a>
+</body>
+</html>

@@ -1,0 +1,247 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sessions for {{ course.course_name }} ({{ course.course_code }})</title>
+    
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+     <script src="https://unpkg.com/lucide@latest/dist/lucide.js"></script>
+
+    <style>
+        /* Base styles applied globally, enhancing readability and visual appeal */
+        body {
+            font-family: 'Inter', sans-serif; /* Using a modern, clean font if available, otherwise fallback */
+            background-color: #f0f2f5; /* Fallback background color */
+            color: #334155; 
+            line-height: 1.6;
+            
+             
+            background-image: url("{% static 'css/lecture_background.jpg' %}");
+            background-size: cover; /* Cover the entire background */
+            background-position: center; /* Center the image */
+            background-repeat: no-repeat; /* Do not repeat the image */
+            background-attachment: fixed; /* Fix the background, so it doesn't scroll with content */
+            
+            /* Ensure body can scroll if its content exceeds viewport height */
+            min-height: 100vh;  
+            overflow-y: none; 
+        }
+
+        
+        .btn-primary {
+            background-color: #4f46e5; /* Indigo 600 */
+            color: white;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca; /* Indigo 700 */
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); /* Soft shadow on hover */
+        }
+        .btn-primary:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.4); /* Focus ring */
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0; /* Gray 200 */
+            color: #475569; /* Gray 700 */
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e1; /* Gray 300 */
+            box-shadow: 0 4px 10px rgba(100, 116, 139, 0.2); /* Soft shadow on hover */
+        }
+        .btn-secondary:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.4); /* Focus ring */
+        }
+
+        /* Page specific styling for clarity and structure */
+        .main-content-wrapper {
+            max-width: 1200px;
+            margin: 2rem auto; /* More vertical margin for breathing room */
+            background-color: #ffffff; /* White background for the main content area */
+            border-radius: 12px; /* Rounded corners for the entire content block */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);  
+            padding: 2.5rem; /* Increased padding inside the wrapper */
+            /* Removed flex properties and min-height here to allow it to grow with content and body to scroll */
+        }
+
+        .page-header {
+            border-bottom: 1px solid #e2e8f0; /* Lighter border */
+            padding-bottom: 1.5rem; /* More padding below the header */
+            margin-bottom: 2rem;
+            text-align: center; 
+        }
+        .page-title {
+            font-size: 2.5rem; /* Larger title */
+            font-weight: 800; /* Extra bold */
+            color: #1a202c; /* Darker text for title */
+            line-height: 1.2;
+            letter-spacing: -0.025em;  
+        }
+        .page-subtitle {
+            margin-top: 0.75rem; /* Adjusted margin */
+            font-size: 1.125rem; /* Slightly larger subtitle */
+            color: #64748b; /* Gray 600 */
+        }
+
+        /* Session card specific enhancements */
+        .class-session-item {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem; /* Space between elements within the card */
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); /* Subtle shadow for cards */
+            border: 1px solid #e2e8f0; /* Light border */
+            padding: 1.75rem;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .class-session-item:hover {
+            transform: translateY(-5px); /* Lift effect on hover */
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1); /* More pronounced shadow on hover */
+        }
+        .class-session-item .flex.items-center.justify-between.mb-4 {
+            margin-bottom: 1rem; /* Adjust inner spacing */
+        }
+        .class-session-item .text-xl.font-bold.text-gray-800 {
+            font-size: 1.625rem; /* Slightly larger day of week */
+            color: #1f2937; /* Even darker for emphasis */
+        }
+        /* --- STYLED 'NEXT: DATE' TAG HERE --- */
+        .class-session-item .date-tag { /* Added a new class 'date-tag' for specific targeting */
+            background-color: #dbeafe; /* Even lighter blue background (blue-100) */
+            color: #1e40af; /* Darker blue text (blue-700) for better contrast */
+            font-weight: 700; /* Bolder font weight */
+            padding: 0.4rem 0.9rem; /* Slightly more padding */
+            border-radius: 9999px; /* Fully rounded pill shape */
+            border: 1px solid #93c5fd; /* Subtle blue border (blue-300) */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Very subtle shadow for depth */
+            text-transform: uppercase; /* Make the text uppercase for emphasis */
+            letter-spacing: 0.025em; /* Slightly increased letter spacing */
+            font-size: 0.75rem; /* Slightly smaller font size to fit well */
+        }
+        /* --- END STYLED 'NEXT: DATE' TAG --- */
+
+        .class-session-item .text-base.text-gray-700.space-y-2 p {
+            display: flex;
+            align-items: center;
+            font-size: 1.05rem; /* Slightly larger body text */
+            color: #4a5568;
+        }
+        .class-session-item .text-base.text-gray-700.space-y-2 i {
+            font-size: 1.25rem; /* Larger icons */
+        }
+        .class-session-item .mt-6.flex.flex-col.sm\:flex-row.gap-3 {
+            margin-top: 2rem; /* More space before buttons */
+            padding-top: 1.5rem;
+            border-top: 1px solid #f3f4f6; /* Subtle separator line */
+        }
+
+        /* Removed specific max-height and overflow from sessions-scroll-container
+           because the body will now handle the main scrolling.
+           We keep the grid and its responsive behavior. */
+        /*
+        .sessions-scroll-container {
+            max-height: calc(100vh - 350px);
+            overflow-y: auto;
+            padding-right: 15px;
+            margin-right: -15px;
+        }
+        */
+
+        /* Custom scrollbar styling (Webkit browsers) - now applies to body scrollbar */
+        body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        body::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
+
+    {# Main content wrapper to center and limit width #}
+    <div class="main-content-wrapper p-6 sm:p-8 md:p-10 lg:p-12">
+        <div class="main-content-section" id="course-sessions-detail-content">
+            <div class="page-header mb-8">
+                <h1 class="page-title">
+                 <span class="text-indigo-600">{{ course.course_name }} ({{ course.course_code }})</span>
+                </h1>
+                <p class="page-subtitle">All scheduled sessions for this course, showing their next upcoming date.</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center sm:justify-start items-center gap-4 mb-8">
+                {# Back to Dashboard Button #}
+                <a href="{% url 'lecturer_dashboard' %}" class="btn-secondary flex items-center px-5 py-2.5 rounded-lg text-sm font-medium shadow-sm w-full sm:w-auto text-center">
+                    <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i> Back to Dashboard
+                </a>
+                {# Add New Session Button #}
+                <a href="{% url 'add_class_session' %}" class="btn-primary flex items-center px-5 py-2.5 rounded-lg text-sm font-medium shadow-sm w-full sm:w-auto text-center">
+                    <i data-lucide="calendar-plus" class="w-5 h-5 mr-2"></i> Add New Session
+                </a>
+            </div>
+
+            {# Conditional rendering for sessions #}
+            {% if course_sessions_list %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {% for session in course_sessions_list %}
+                <div class="list-item class-session-item">
+                    <div class="flex items-center justify-between mb-4">
+                        {# Display the day of the week #}
+                        <span class="text-xl font-bold text-gray-800">{{ session.day_of_week }}</span>
+                    </div>
+                    <div class="text-base text-gray-700 space-y-2">
+                        {# Display session times #}
+                        <p class="flex items-center">
+                            <i data-lucide="clock" class="w-5 h-5 mr-3 text-indigo-500"></i>
+                            {{ session.start_time|time:"H:i A" }} - {{ session.end_time|time:"H:i A" }}
+                        </p>
+                        {# Display session location #}
+                        <p class="flex items-center">
+                            <i data-lucide="map-pin" class="w-5 h-5 mr-3 text-red-500"></i>
+                            Vanue: {{ session.location }}
+                        </p>
+                    </div>
+                    <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                        {# Link to edit this specific session #}
+                        <a href="{% url 'edit_class_session' session.id %}" class="inline-flex items-center justify-center px-4 py-2 bg-blue-500 text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex-grow">
+                            <i data-lucide="edit" class="w-4 h-4 mr-2"></i> Edit Session
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            {# Message if no sessions are found for the course #}
+            <div class="card bg-white shadow-lg rounded-xl p-8 border border-gray-200">
+                <div class="card-content">
+                    <p class="text-center text-gray-500 py-8 text-lg">No class sessions scheduled for this course yet.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Initialize Lucide icons #}
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

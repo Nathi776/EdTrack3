@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - EduTrack</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Base styles for Inter font and antialiasing */
+        html, body {
+            height: 100%; /* Ensure html and body take full viewport height */
+            margin: 0; /* Remove default body margin */
+            padding: 0; /* Remove default body padding */
+            overflow: hidden; /* Prevent scrolling if content fits */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #e2e8f0; /* Softer light gray background for the whole page */
+            display: flex; /* Use flex to center the container */
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
+        }
+
+        /* Main login container - Now acts as the full-page wrapper */
+        .login-container {
+            display: flex;
+            height: 100vh; /* Take full viewport height */
+            width: 100vw; /* Take full viewport width */
+            align-items: center; /* Center the login card vertically */
+            justify-content: center; /* Center the login card horizontally */
+            box-sizing: border-box;
+            padding: 2rem; /* Add some overall padding to prevent sticking to edges */
+        }
+
+        /* NEW: Wrapper for the login form and visual sections */
+        .login-card {
+            display: flex;
+            width: 90%; /* Adjust overall width */
+            max-width: 1200px; /* Max width for larger screens */
+            height: 90%; /* Adjust overall height */
+            min-height: 600px; /* Define a minimum height for the entire login card */
+            background-color: #ffffff; /* Default background for the card */
+            border-radius: 1.5rem; /* More pronounced border-radius */
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); /* Stronger, more diffused shadow */
+            overflow: hidden; /* Crucial to clip children's corners */
+            animation: fadeIn 0.8s ease-out; /* Add a subtle fade-in animation for the card */
+        }
+
+        /* Keyframe for fade-in animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Left section (form) */
+        .left-section {
+            flex: 0 0 40%; /* Occupy 40% width for the form side */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3.5rem 3rem; /* Generous padding for content inside */
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); /* Subtle gradient for depth */
+            position: relative;
+            z-index: 2; /* Ensure it's above potential background elements */
+        }
+
+        /* Right section (visual/branding) */
+        .right-section {
+            flex: 0 0 60%; /* Occupy 60% width */
+            background: linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #9333EA 100%); /* Blue to Indigo to Purple */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 2.5rem; /* Generous padding for content inside */
+            text-align: center;
+            position: relative; /* For pseudo-elements */
+            overflow: hidden; /* Hide overflowing pseudo-elements */
+        }
+
+        /* Abstract shapes for the right section */
+        .right-section::before,
+        .right-section::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15); /* Slightly less transparent white */
+            border-radius: 50%;
+            filter: blur(45px); /* More blur effect */
+            z-index: 0;
+            animation: float 8s ease-in-out infinite; /* Floating animation */
+        }
+
+        .right-section::before {
+            width: 220px; /* Larger */
+            height: 220px;
+            top: -80px; /* Adjusted position */
+            left: -80px;
+            animation-delay: 0s;
+        }
+
+        .right-section::after {
+            width: 300px; /* Larger */
+            height: 300px;
+            bottom: -100px; /* Adjusted position */
+            right: -100px;
+            animation-delay: 2s; /* Staggered animation */
+        }
+
+        /* Keyframe for floating animation */
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, 20px) scale(1.05); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        .right-section .content {
+            position: relative; /* Ensure content is above pseudo-elements */
+            z-index: 1;
+            animation: slideInUp 1s ease-out; /* Content slide-in animation */
+        }
+
+        /* Keyframe for slide-in-up animation */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .right-section h2 {
+            font-size: 3rem; /* Even larger heading */
+            font-weight: 900; /* Black font weight */
+            margin-bottom: 1.25rem;
+            letter-spacing: -0.06em; /* Tighter letter spacing */
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* More pronounced text shadow */
+            line-height: 1.1;
+        }
+
+        .right-section p {
+            font-size: 1.35rem; /* Larger paragraph text */
+            line-height: 1.7;
+            opacity: 0.98; /* Slightly less transparent */
+            max-width: 450px; /* Constrain width for readability */
+            margin-top: 0.75rem;
+        }
+
+        /* Form container within left section */
+        .form-container {
+            width: 100%;
+            max-width: 420px; /* Slightly wider max-width for the form elements */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%; /* Allow form content to fill available height */
+        }
+
+        .form-container h3 {
+            text-align: center;
+            margin-bottom: 2.5rem; /* More space below heading */
+            font-size: 2.5rem; /* Larger heading */
+            font-weight: 800; /* Extra bold */
+            color: #4f46e5; /* EduTrack branding blue */
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Subtle shadow for text */
+        }
+
+        /* Form group styling */
+        .form-group {
+            margin-bottom: 1.75rem; /* More space between form groups */
+            position: relative; /* For password toggle icon positioning */
+        }
+
+        .form-label {
+            display: flex; /* Use flex to align label and optional icon */
+            align-items: center; /* Vertically center them */
+            margin-bottom: 0.6rem; /* Slightly more space below label */
+            font-weight: 600; /* Semibold font weight */
+            color: #374151; /* Darker gray for labels */
+            font-size: 1rem; /* Slightly larger font size */
+            letter-spacing: 0.02em; /* Subtle letter spacing */
+        }
+
+        .form-label i { /* Styling for Font Awesome icon in label */
+            margin-right: 0.6rem; /* More space between icon and text */
+            color: #4f46e5; /* Match brand color */
+            font-size: 1.1em; /* Slightly larger icon */
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.9rem 1.25rem; /* More padding for inputs */
+            border: 1px solid #cbd5e1; /* Slightly darker light gray border */
+            border-radius: 0.75rem; /* More rounded corners */
+            font-size: 1.05rem; /* Slightly larger font size */
+            color: #1a202c; /* Darker text color */
+            background-color: #f8fafc; /* Very light background for inputs */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4f46e5; /* Accent color on focus */
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.3); /* Stronger, softer focus ring */
+            background-color: #ffffff; /* White background on focus */
+        }
+
+        /* Password toggle button */
+        .password-toggle {
+            position: absolute;
+            right: 1.25rem; /* More space from the right */
+            top: 70%; /* Adjusted to center vertically within the input's height */
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #94a3b8; /* Lighter gray icon */
+            font-size: 1.1rem; /* Slightly larger icon */
+            transition: color 0.2s ease;
+        }
+
+        .password-toggle:hover {
+            color: #4f46e5; /* Accent on hover */
+        }
+
+        /* Login button */
+        .login-button {
+            margin-top: 2.5rem; /* More space above the button */
+            width: 100%;
+            padding: 1rem 1.75rem; /* More padding */
+            background-color: #4f46e5; /* Primary blue */
+            color: white;
+            font-weight: 700; /* Bold */
+            border-radius: 0.75rem; /* More rounded corners */
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1.15rem; /* Larger font size */
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); /* Stronger shadow */
+            letter-spacing: 0.05em; /* Some letter spacing for impact */
+            text-transform: uppercase; /* Uppercase text */
+        }
+
+        .login-button:hover {
+            background-color: #4338ca; /* Darker blue on hover */
+            transform: translateY(-3px); /* More pronounced lift effect */
+            box-shadow: 0 12px 25px rgba(79, 70, 229, 0.5); /* Even stronger shadow */
+        }
+
+        .login-button:active {
+            transform: translateY(0); /* Press down effect */
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Message styling */
+        .message-alert {
+            border-radius: 0.75rem; /* More rounded corners */
+            padding: 1rem 1.25rem; /* More padding */
+            margin-top: 1.75rem; /* More space above messages */
+            font-size: 0.95rem; /* Slightly larger font size */
+            text-align: center;
+            opacity: 1;
+            transition: opacity 0.5s ease-out, transform 0.3s ease-out; /* Add transform transition */
+            margin-bottom: 1.25rem; /* More space below messages */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem; /* More space between icon and text */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for messages */
+        }
+
+        .message-alert.hidden { /* Class to hide messages */
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .message-alert i { /* Styling for Font Awesome icon in messages */
+            font-size: 1.2em; /* Larger icon */
+        }
+
+        .message-alert.error {
+            background-color: #fee2e2; /* Red-100 */
+            color: #dc2626; /* Red-600 */
+            border: 1px solid #f87171; /* Red-400 */
+        }
+        .message-alert.info {
+            background-color: #e0f2fe; /* Blue-100 */
+            color: #2563eb; /* Blue-600 */
+            border: 1px solid #93c5fd; /* Blue-300 */
+        }
+        .message-alert.success {
+            background-color: #d1fae5; /* Green-100 */
+            color: #047857; /* Green-700 */
+            border: 1px solid #6ee7b7; /* Green-300 */
+        }
+        .message-alert.warning {
+            background-color: #fffacd; /* Yellow-100 */
+            color: #ca8a04; /* Yellow-700 */
+            border: 1px solid #fbbf24; /* Yellow-400 */
+        }
+
+        /* Forgot password link */
+        .forgot-password-link {
+            text-align: center;
+            margin-top: 1.5rem; /* More space above the link */
+            font-size: 0.95rem; /* Slightly larger font size */
+            color: #4f46e5; /* Primary blue */
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500; /* Medium font weight */
+        }
+
+        .forgot-password-link:hover {
+            color: #4338ca; /* Darker blue on hover */
+            text-decoration: underline;
+        }
+
+        /* Copyright text */
+        .copyright {
+            text-align: center;
+            margin-top: auto; /* Push to bottom */
+            padding-top: 2rem; /* Space above copyright */
+            font-size: 0.85rem; /* Slightly larger font size */
+            color: #9ca3af; /* Gray-400 */
+            font-weight: 400;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) { /* Adjust breakpoint for larger tablets/smaller laptops */
+            .login-card {
+                max-width: 90%;
+                height: auto; /* Allow height to adjust */
+                min-height: auto;
+                flex-direction: column; /* Stack sections vertically */
+                border-radius: 1.5rem; /* Maintain rounded corners for the stacked card */
+            }
+
+            .left-section, .right-section {
+                width: 100%; /* Full width when stacked */
+                flex-basis: auto; /* Reset flex-basis for stacking */
+                min-height: 280px; /* Adjust min height for mobile sections */
+                padding: 2.5rem;
+            }
+
+            .left-section {
+                border-radius: 1.5rem 1.5rem 0 0; /* Top rounded corners on stacked view */
+            }
+
+            .right-section {
+                order: -1; /* Place visual section above the form on smaller screens */
+                border-radius: 0 0 1.5rem 1.5rem; /* Bottom rounded corners on stacked view */
+            }
+
+            .right-section h2 {
+                font-size: 2.25rem; /* Adjust for smaller screens */
+            }
+
+            .right-section p {
+                font-size: 1.15rem; /* Adjust for smaller screens */
+            }
+
+            .form-container h3 {
+                font-size: 2rem; /* Adjust for smaller screens */
+                margin-bottom: 2rem;
+            }
+
+            .form-control {
+                padding: 0.8rem 1rem;
+            }
+
+            .login-button {
+                padding: 0.9rem 1.5rem;
+                font-size: 1.05rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 1rem;
+            }
+            .login-card {
+                border-radius: 1rem; /* Slightly less rounded on small mobile */
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            }
+            .left-section, .right-section {
+                padding: 2rem;
+                min-height: 250px;
+            }
+            .left-section {
+                border-radius: 1rem 1rem 0 0;
+            }
+            .right-section {
+                border-radius: 0 0 1rem 1rem;
+            }
+            .right-section h2 {
+                font-size: 1.9rem;
+            }
+            .right-section p {
+                font-size: 1rem;
+            }
+            .form-container h3 {
+                font-size: 1.75rem;
+                margin-bottom: 1.75rem;
+            }
+            .form-group {
+                margin-bottom: 1.25rem;
+            }
+            .form-label {
+                font-size: 0.9rem;
+            }
+            .form-control {
+                font-size: 0.95rem;
+                padding: 0.75rem 1rem;
+            }
+            .login-button {
+                font-size: 1rem;
+                padding: 0.8rem 1.25rem;
+                margin-top: 2rem;
+            }
+            .message-alert {
+                font-size: 0.85rem;
+                padding: 0.6rem 0.8rem;
+            }
+            .forgot-password-link {
+                font-size: 0.85rem;
+                margin-top: 1rem;
+            }
+            .copyright {
+                font-size: 0.75rem;
+                padding-top: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .left-section, .right-section {
+                padding: 1.5rem;
+                min-height: 200px;
+            }
+            .form-container h3 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            .right-section h2 {
+                font-size: 1.6rem;
+                margin-bottom: 0.75rem;
+            }
+            .right-section p {
+                font-size: 0.9rem;
+            }
+            .form-group {
+                margin-bottom: 1rem;
+            }
+            .form-control {
+                padding: 0.6rem 0.8rem;
+            }
+            .login-button {
+                padding: 0.7rem 1rem;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="left-section">
+                <div id="login-form-container" class="form-container">
+                    <h3>EduTrack</h3>
+                    <form action="{% url 'login' %}" method="post">
+                        {% csrf_token %}
+                        
+                        {# --- Message Display Area (will be managed by JS) --- #}
+                        <div id="message-container">
+                            {% for message in messages %}
+                                <div class="message-alert {{ message.tags }}">
+                                    {% if message.tags == "error" %}
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    {% elif message.tags == "info" %}
+                                        <i class="fas fa-info-circle"></i>
+                                    {% elif message.tags == "success" %}
+                                        <i class="fas fa-check-circle"></i>
+                                    {% elif message.tags == "warning" %}
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    {% endif %}
+                                    <span>{{ message }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {# --- End Message Display Area --- #}
+
+                        <div class="form-group">
+                            <label for="user_number" class="form-label" id="user-number-label">
+                                <i class="fas fa-user"></i> Username
+                            </label>
+                            <input type="text" class="form-control" id="user_number" name="user_number" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock"></i> Password
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <button type="button" id="toggle-password" class="password-toggle">
+                                <i class="fas fa-eye-slash"></i>
+                            </button>
+                        </div>
+
+                        <button type="submit" class="login-button">Login</button>
+                    </form>
+                    
+                    <a href="#" class="forgot-password-link">Forgot password?</a>
+                    <p class="copyright">
+                        &copy; {% now "Y" %} EduTrack
+                    </p>
+                </div>
+
+                <!--   container for displaying dynamic messages (errors, logout success) and the dismiss button -->
+                <div id="dynamic-message-display-container" class="hidden flex flex-col items-center justify-center text-center p-8 bg-white rounded-lg shadow-xl" style="width: 100%; max-width: 420px; min-height: 300px;">
+                    <div id="dynamic-message-alert" class="message-alert mb-6 w-full flex-col">
+                        <i id="dynamic-message-icon" class="text-6xl mb-4"></i>
+                        <span id="dynamic-message-text" class="text-xl font-semibold"></span>
+                    </div>
+                    <button type="button" id="dismiss-dynamic-message-button" class="login-button" style="margin-top: 0;">
+                       Back
+                    </button>
+                </div>
+            </div>
+            <div class="right-section">
+                <div class="content">
+                    <h2>Welcome to EduTrack</h2>
+                    <p>Your all-in-one platform for effortless academic management. Log in to access your personalized dashboard and streamline your daily tasks</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordField = document.getElementById('password');
+            const togglePassword = document.getElementById('toggle-password');
+            const loginFormContainer = document.getElementById('login-form-container');
+            
+            //   dynamic message display elements
+            const dynamicMessageDisplayContainer = document.getElementById('dynamic-message-display-container');
+            const dynamicMessageAlert = document.getElementById('dynamic-message-alert');
+            const dynamicMessageIcon = document.getElementById('dynamic-message-icon');
+            const dynamicMessageText = document.getElementById('dynamic-message-text');
+            const dismissDynamicMessageButton = document.getElementById('dismiss-dynamic-message-button');
+
+            const messageContainer = document.getElementById('message-container');
+
+            let messageToDisplay = {
+                type: null,   
+                text: ''
+            };
+
+            // Toggle password visibility
+            if (togglePassword && passwordField) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordField.setAttribute('type', type);
+                    // Toggle the icon
+                    this.querySelector('i').classList.toggle('fa-eye');
+                    this.querySelector('i').classList.toggle('fa-eye-slash');
+                });
+            }
+
+            // Process all Django messages
+            if (messageContainer) {
+                const messageAlerts = messageContainer.querySelectorAll('.message-alert');
+
+                messageAlerts.forEach(alertElement => {
+                    const messageText = alertElement.textContent.trim();
+                    const lowerCaseMessage = messageText.toLowerCase();
+
+                    const isLoginSuccessPhrase = lowerCaseMessage.includes('successfully logged in') ||
+                                                 lowerCaseMessage.includes('welcome back');
+                    const isLogoutSuccessPhrase = lowerCaseMessage.includes('logged out successfully') ||
+                                                  lowerCaseMessage.includes('goodbye'); 
+
+                    if (alertElement.classList.contains('error')) {
+                        // Prioritize displaying the first error message
+                        if (!messageToDisplay.type) { // Only set if no other primary message already captured
+                            messageToDisplay.type = 'error';
+                            messageToDisplay.text = messageText;
+                        }
+                    } else if (alertElement.classList.contains('success') && isLogoutSuccessPhrase) {
+                        // If it's a logout success message, and no error was prioritized
+                        if (!messageToDisplay.type || messageToDisplay.type !== 'error') {
+                           messageToDisplay.type = 'success';
+                           messageToDisplay.text = messageText;
+                        }
+                    } 
+                    alertElement.remove(); // Remove all original Django message elements from the DOM
+                });
+            }
+
+            // Initial display logic based on whether a blocking message was found
+            if (messageToDisplay.type) {
+                loginFormContainer.classList.add('hidden');
+                dynamicMessageDisplayContainer.classList.remove('hidden');
+                
+                dynamicMessageText.textContent = messageToDisplay.text;
+
+                // Reset message alert classes and set based on type
+                dynamicMessageAlert.className = 'message-alert mb-6 w-full flex-col'; // Reset to base classes
+                dynamicMessageIcon.className = 'text-6xl mb-4'; // Reset icon classes
+
+                if (messageToDisplay.type === 'error') {
+                    dynamicMessageAlert.classList.add('error');
+                    dynamicMessageIcon.classList.add('fas', 'fa-exclamation-circle');
+                } else if (messageToDisplay.type === 'success') {
+                    dynamicMessageAlert.classList.add('success');
+                    dynamicMessageIcon.classList.add('fas', 'fa-check-circle');
+                }
+                
+            } else {
+                loginFormContainer.classList.remove('hidden');
+                dynamicMessageDisplayContainer.classList.add('hidden');
+            }
+
+            // Event listener for the dismiss dynamic message button
+            if (dismissDynamicMessageButton) {
+                dismissDynamicMessageButton.addEventListener('click', () => {
+                    dynamicMessageDisplayContainer.classList.add('hidden');
+                    loginFormContainer.classList.remove('hidden');
+                    dynamicMessageText.textContent = '';  
+                    dynamicMessageIcon.className = '';  
+                    dynamicMessageAlert.className = 'message-alert mb-6 w-full flex-col'; 
+                     
+                });
+            }
+        });
+    </script>
+</body>
+</html>

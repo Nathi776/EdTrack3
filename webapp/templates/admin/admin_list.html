@@ -1,0 +1,17 @@
+<h1>Admins</h1>
+<a href="{% url 'admin_create' %}">Add Admin</a>
+<table border="1">
+<tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr>
+{% for admin in admins %}
+<tr>
+  <td>{{ admin.adminID }}</td>
+  <td>{{ admin.firstName }} {{ admin.lastName }}</td>
+  <td>{{ admin.email }}</td>
+  <td>
+    <a href="{% url 'admin_update' admin.adminID %}">Edit</a> |
+    <a href="{% url 'admin_delete' admin.adminID %}">Delete</a>
+  </td>
+</tr>
+{% endfor %}
+</table>
+<a href="{% url 'home' %}">Back to home</a> 

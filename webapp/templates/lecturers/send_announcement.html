@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Announcement</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/lucide.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            color: #334155;
+            line-height: 1.6;
+            
+            /* Background Image Styles */
+            background-image: url("{% static 'css/lecture_background.jpg' %}");e: url('https://source.unsplash.com/random/1600x900/?university,campus'); /* Replace with your image path or a preferred Unsplash query */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Makes the background image fixed while content scrolls */
+            display: flex; /* Use flexbox to center content vertically */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Ensure body takes full viewport height */
+            padding: 2rem 0; /* Add some vertical padding */
+        }
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            padding: 0.75rem 1.5rem; /* Adjusted padding */
+            font-size: 1rem; /* Adjusted font size */
+            border-radius: 0.5rem; /* Slightly rounded corners */
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+            box-shadow: 0 6px 15px rgba(79, 70, 229, 0.4); /* Stronger shadow on hover */
+        }
+        .btn-primary:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.6); /* More prominent focus ring */
+        }
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #475569;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            padding: 0.6rem 1.2rem; /* Adjusted padding */
+            font-size: 0.9rem; /* Adjusted font size */
+            border-radius: 0.5rem; /* Slightly rounded corners */
+            border: 1px solid #cbd5e1; /* Added a subtle border */
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+            box-shadow: 0 4px 10px rgba(100, 116, 139, 0.3);
+        }
+        .btn-secondary:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.5);
+        }
+        .main-content-wrapper {
+            max-width: 800px;
+            width: 90%; /* Make it responsive */
+            max-height: 90vh; /* Limit max height for scrollability */
+            margin: 2rem auto;
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white background */
+            border-radius: 16px; /* More rounded corners */
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); /* Stronger, softer shadow */
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Hide overflow to allow inner scrolling */
+        }
+        .main-content-section {
+            overflow-y: auto; /* Make this section scrollable if content overflows */
+            padding-right: 15px; /* Add padding for scrollbar to avoid content being hidden */
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: #4f46e5 #e2e8f0; /* Firefox */
+        }
+        /* Webkit (Chrome, Safari) scrollbar styling */
+        .main-content-section::-webkit-scrollbar {
+            width: 10px;
+        }
+        .main-content-section::-webkit-scrollbar-track {
+            background: #e2e8f0; /* Light gray track */
+            border-radius: 10px;
+        }
+        .main-content-section::-webkit-scrollbar-thumb {
+            background-color: #4f46e5; /* Primary blue thumb */
+            border-radius: 10px;
+            border: 2px solid #e2e8f0; /* Padding around thumb */
+        }
+
+        .page-header {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .page-title {
+            font-size: 2.75rem; /* Slightly larger title */
+            font-weight: 800;
+            color: #1a202c;
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+        }
+        .page-subtitle {
+            margin-top: 0.75rem;
+            font-size: 1.2rem; /* Slightly larger subtitle */
+            color: #64748b;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.5rem;
+            font-size: 1rem; /* Slightly larger labels */
+        }
+        .form-group input[type="text"], 
+        .form-group textarea,
+        .form-group select {
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem; /* More rounded inputs */
+            padding: 0.75rem 1rem; /* More padding */
+            width: 100%;
+            font-size: 1rem;
+            color: #475569;
+            background-color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); /* Slightly stronger shadow */
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.35); /* Stronger focus ring */
+        }
+        .help-text {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+        .errorlist {
+            color: #ef4444;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            list-style: none;
+            padding-left: 0;
+        }
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1.5rem;
+        }
+        .message {
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        .message.success {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #4ade80;
+        }
+        .message.error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #f87171;
+        }
+        .message.warning {
+            background-color: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fbbf24;
+        }
+        .message i {
+            margin-right: 0.75rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
+
+    <div class="main-content-wrapper p-6 sm:p-8 md:p-10 lg:p-12">
+        <div class="main-content-section" id="send-announcement-content">
+            <div class="page-header mb-8">
+                <h1 class="page-title">
+                    Send Announcement
+                </h1>
+                <p class="page-subtitle">Communicate important updates to your students.</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-start items-center gap-4 mb-8">
+                <a href="{% url 'lecturer_dashboard' %}" class="btn-secondary flex items-center px-5 py-2.5 rounded-lg text-sm font-medium shadow-sm">
+                    <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i> Back to Dashboard
+                </a>
+            </div>
+
+            {# Django Messages #}
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                    <li {% if message.tags %} class="message {{ message.tags }}"{% endif %}>
+                        {% if message.tags == "success" %}<i data-lucide="check-circle" class="w-5 h-5"></i>{% endif %}
+                        {% if message.tags == "error" %}<i data-lucide="x-circle" class="w-5 h-5"></i>{% endif %}
+                        {% if message.tags == "warning" %}<i data-lucide="alert-circle" class="w-5 h-5"></i>{% endif %}
+                        {{ message }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <div class="card bg-white shadow-lg rounded-xl p-8 border border-gray-200">
+                <form method="post" action="{% url 'send_announcement' %}">
+                    {% csrf_token %}
+
+                    <div class="space-y-6">
+                        <div class="form-group">
+                            <label for="{{ form.course_code.id_for_label }}">{{ form.course_code.label }}</label>
+                            {{ form.course_code }}
+                            {% if form.course_code.help_text %}<p class="help-text">{{ form.course_code.help_text }}</p>{% endif %}
+                            {% if form.course_code.errors %}<ul class="errorlist">{% for error in form.course_code.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.subject.id_for_label }}">{{ form.subject.label }}</label>
+                            {{ form.subject }}
+                            {% if form.subject.help_text %}<p class="help-text">{{ form.subject.help_text }}</p>{% endif %}
+                            {% if form.subject.errors %}<ul class="errorlist">{% for error in form.subject.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>
+                            {{ form.message }}
+                            {% if form.message.help_text %}<p class="help-text">{{ form.message.help_text }}</p>{% endif %}
+                            {% if form.message.errors %}<ul class="errorlist">{% for error in form.message.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <button type="submit" class="btn-primary w-full px-5 py-2.5 rounded-lg text-lg font-semibold shadow-md hover:shadow-lg focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50">
+                            <i data-lucide="send" class="w-5 h-5 inline-block mr-2"></i> Send Announcement
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Initialize Lucide icons #}
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% comment %} academics/templates/academics/class_session_form.html {% endcomment %}
+
+    {% load static %}
+    <title>{% if class_session %}Edit Class Schedule{% else %}Add Class Schedule{% endif %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+             background-image: url("{% static 'css/back_ground.png' %}");
+             background-size: cover;
+            min-height: 100vh; /* Ensure body takes full viewport height */
+            display: flex; /* Use flexbox for centering */
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
+            padding: 2rem 0; /* Add some vertical padding */
+        }
+        .form-container {
+            background-color: #ffffff;
+            border-radius: 1.25rem; /* More rounded */
+            padding: 2.5rem; /* Generous padding */
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 0 8px 15px rgba(0, 0, 0, 0.08); /* Deeper shadow */
+            max-width: 600px; /* Max width for readability */
+            width: 90%; /* Responsive width */
+            margin: auto; /* Center with auto margin if not using body flex */
+            border: 1px solid #e2e8f0; /* Subtle border */
+        }
+        /* Add this to your CSS file */
+.btn-blue {
+    background-color: #2563eb; /* A nice blue */
+    color: #fff;
+    border: none;
+}
+        .form-title {
+            font-size: 2.25rem; /* Larger title */
+            font-weight: 800; /* Extra bold */
+            color: #1a202c;
+            margin-bottom: 1.5rem; /* More space below title */
+            text-align: center;
+        }
+        .form-subtitle {
+            font-size: 1rem;
+            color: #4a5568;
+            margin-bottom: 2rem; /* More space */
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 1.5rem; /* More space between form groups */
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.95rem; /* Slightly larger label */
+            font-weight: 600; /* Semibold */
+            color: #2d3748;
+            margin-bottom: 0.6rem; /* Space below label */
+        }
+        /* Styling for inputs and selects, derived from TAILWIND_INPUT_CLASSES and TAILWIND_SELECT_CLASSES */
+        .form-group input[type="text"],
+        .form-group input[type="time"],
+        .form-group select {
+            width: 100%;
+            padding: 0.85rem 1rem; /* More padding */
+            border: 1px solid #cbd5e0;
+            border-radius: 0.625rem; /* More rounded inputs */
+            font-size: 1rem;
+            color: #2d3748;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); /* Subtle inner shadow */
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #000dfc;
+            box-shadow: 0 0 0 4px rgba(5, 77, 160, 0.25); /* Stronger focus ring */
+        }
+        /* Specific styling for time input's calendar picker, if needed */
+        .form-group input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(30%) sepia(80%) saturate(1500%) hue-rotate(220deg) brightness(90%) contrast(90%);
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end; /* Align buttons to the right */
+            gap: 1rem; /* Space between buttons */
+            margin-top: 2rem; /* More space above buttons */
+        }
+        .form-actions button, .form-actions .button { /* Apply to both button and anchor with 'button' class */
+            padding: 0.8rem 1.75rem; /* More padding for buttons */
+            font-weight: 600;
+            border-radius: 0.75rem; /* More rounded buttons */
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-decoration: none; /* For anchor tags acting as buttons */
+        }
+        .form-actions .btn-primary {
+            background-color: #4c51bf;
+            color: white;
+            box-shadow: 0 6px 15px rgba(76, 81, 191, 0.35); /* Stronger primary shadow */
+        }
+        .form-actions .btn-primary:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 81, 191, 0.45);
+        }
+        .form-actions .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+        }
+        .form-actions .btn-secondary:hover {
+            background-color: #cbd5e0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+        .errorlist {
+            color: #e53e3e;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            list-style-type: disc;
+            padding-left: 1.25rem;
+        }
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        .messages li {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .messages .success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .messages .error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0;
+            }
+            .form-container {
+                padding: 1.5rem;
+            }
+            .form-title {
+                font-size: 1.75rem;
+            }
+            .form-subtitle {
+                font-size: 0.9rem;
+            }
+            .form-group {
+                margin-bottom: 1rem;
+            }
+            .form-group label {
+                font-size: 0.875rem;
+            }
+            .form-group input, .form-group select {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+            .form-actions {
+                flex-direction: column; /* Stack buttons vertically on small screens */
+                gap: 0.75rem;
+            }
+            .form-actions button, .form-actions .button {
+                width: 100%;
+                padding: 0.75rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h1 class="form-title">
+            {% if class_session %}Edit Class Schedule{% else %}Add New Class Schedule{% endif %}
+        </h1>
+        <p class="form-subtitle">
+            {% if class_session %}Modify the details for this class session.{% else %}Fill in the details to schedule a new class session.{% endif %}
+        </p>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li>{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="errorlist p-3 mb-4 rounded-md bg-red-100 text-red-700 border border-red-300">
+                    <p class="font-bold mb-1">Please correct the following errors:</p>
+                    <ul>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                {# Render the hidden lecturer field first if it exists #}
+                {% if form.lecturer.is_hidden %}
+                    {{ form.lecturer }}
+                {% endif %}
+
+                <div class="form-group md:col-span-2">
+                    {{ form.course.label_tag }}
+                    {{ form.course }}
+                    {% if form.course.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.course.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.day_of_week.label_tag }}
+                    {{ form.day_of_week }}
+                    {% if form.day_of_week.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.day_of_week.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.room.label_tag }}
+                    {{ form.room }}
+                    {% if form.room.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.room.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.start_time.label_tag }}
+                    {{ form.start_time }}
+                    {% if form.start_time.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.start_time.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.end_time.label_tag }}
+                    {{ form.end_time }}
+                    {% if form.end_time.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.end_time.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'lecturer_dashboard' %}" class="btn-secondary button">
+                    <i data-lucide="x" class="w-5 h-5 mr-2"></i> Cancel
+                </a>
+ 
+
+<button type="submit" class="btn-blue button">
+    <i data-lucide="save" class="w-5 h-5 mr-2"></i>
+    {% if class_session %}Save Changes{% else %}Add Session{% endif %}
+</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Initialize Lucide icons on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

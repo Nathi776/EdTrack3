@@ -1,0 +1,9 @@
+{% if subjects %}
+    <ul>
+        {% for subject in subjects %}
+            <li>{{ subject.subject_code }}: {{ subject.subject_name }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>{{ error }}</p>
+{% endif %}

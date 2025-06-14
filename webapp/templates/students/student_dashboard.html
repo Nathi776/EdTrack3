@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Django Static Files Loader -->
+    {% load static %} 
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Tailwind CSS (for utility classes, though custom CSS is primary) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* Custom base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Lighter, more modern background gray */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.6;
+            color: #2c3e50; /* Darker, richer text color for better readability */
+        }
+/* Sidebar - Sleek Modern Look */
+.divider {
+    width: 100%;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.2); /* Subtle white-transparent line */
+    margin: 15px 0;
+}
+
+.sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #065a96, #0766a5); /* Gradient effect */
+    color: #e3f2fd;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 2rem 1.5rem;
+    box-shadow: 8px 0 20px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+}
+
+/* User Info Section */
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    padding: 20px;
+    border-radius: 10px;
+   color: #c0e2ff;
+    text-align: center;
+}
+
+.user-info h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.user-id, .user-name {
+    font-size: 16px;
+    padding: 6px 12px;
+    font-weight: 600;
+}
+
+/* Navigation Menu */
+.nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.nav-item {
+    margin-bottom: 1rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.2rem;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    font-weight: 500;
+    background: transparent;
+}
+
+.nav-link i {
+    margin-right: 1rem;
+    font-size: 1.3rem;
+    color: #e0f2f7;
+    transition: color 0.3s ease-in-out;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(6px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.nav-link.active {
+    background: rgba(255, 255, 255, 0.2);
+    font-weight: 700;
+    border-left: 5px solid #8c9eff;
+}
+
+ 
+.logout-form {
+    margin-top: auto;
+}
+
+.logout-form .btn-danger {
+    background: #ef4444;
+    border: none;
+    font-weight: 600;
+    padding: 0.85rem 1.25rem;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+}
+
+.logout-form .btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-3px);
+}
+/* Main Content Area */
+        .main-content-wrapper {
+            margin-left: 260px;
+            padding: 2.5rem; /* Even more generous padding */
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100vh;
+            background-image: url("{% static 'css/students-classroom.jpg' %}");  
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .main-content-section {
+            background-color: transparent;  
+            border-radius: 1.25rem; 
+            padding: 2.25rem; /* More padding inside sections */
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.1), 0 5px 15px -5px rgba(0, 0, 0, 0.05); /* Lighter, more subtle shadow */
+            border: 1px solid #e0e7ff; /* Soft indigo border */
+            transition: all 0.3s ease-in-out;
+             
+        }
+        .main-content-section:hover {
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15), 0 8px 20px -6px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Page Header (within each main-content-section) */
+        .page-header {
+            font-size: 2.25rem; /* Larger header */
+            font-weight: 800; /* Extra bold */
+            margin-bottom: 2.25rem; /* More space below header */
+            color: #2c3e50; /* Darker text */
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e0e7ff; /* Soft indigo border */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .page-header .btn {
+            font-size: 0.95rem;
+            padding: 0.7rem 1.2rem;
+            border-radius: 0.65rem;
+        }
+
+        /* Card Styling */
+        .custom-card {
+            background: #ffffff;
+            border-radius: 1.25rem; /* More rounded */
+            padding: 2rem; /* More padding */
+            box-shadow: 0 8px 20px -6px rgba(0,0,0,0.1), 0 4px 10px -4px rgba(0,0,0,0.05); /* Softer, slightly deeper shadow */
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e0e7ff; /* Soft indigo border */
+            overflow: hidden; /* For potential background elements */
+            position: relative;
+        }
+        .custom-card::before { /* Subtle background pattern/glow */
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            width: 80px;
+            height: 80px;
+            background-color: rgba(91, 109, 224, 0.05); /* Light indigo */
+            border-radius: 50%;
+            filter: blur(25px);
+            z-index: 0;
+        }
+        .custom-card:hover {
+            transform: translateY(-8px); /* More pronounced lift */
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.15), 0 8px 20px -6px rgba(0,0,0,0.08); /* Deeper shadow on hover */
+        }
+        .custom-card-header {
+            font-size: 1.35rem;  
+            font-weight: 700;  
+            margin-bottom: 1.5rem;
+            color: #5b6de0;  
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e0e7ff;
+            position: relative;
+            z-index: 1; 
+        }
+        .custom-card-content {
+            color: #4a6572; 
+            font-size: 1.05rem; 
+            line-height: 1.75;
+            position: relative;
+            z-index: 1;
+        }
+        .custom-card-content ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .custom-card-content ul li {
+            padding: 0.6rem 0; 
+            border-bottom: 1px dashed #e7eff6;  
+        }
+        .custom-card-content ul li:last-child {
+            border-bottom: none;
+        }
+        .custom-card-content p strong {
+            color: #2c3e50; 
+        }
+        .custom-card-content .text-indigo-600 { 
+            color: #5b6de0;
+            font-weight: 600;
+        }
+        .custom-card-content .text-indigo-600:hover {
+            color: #4a5ed9; /* Deeper indigo on hover */
+        }
+
+        /* Dashboard Cards Grid */
+        .dashboard-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));  
+            gap: 2.5rem; /* More gap */
+            margin-top: 2.5rem;
+        }
+
+        /* Personal Profile Hero Section Styling - Refined */
+        .personal-profile-hero {
+            background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%); 
+            border-radius: 1.5rem; /* Very rounded corners */
+            padding: 3.5rem; /* More generous padding */
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.18), 0 10px 15px -5px rgba(0,0,0,0.1);  
+            border: 1px solid #c7d2fe; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 3rem;  
+            position: relative;
+            overflow: hidden;
+        }
+
+        .personal-profile-hero::before, .personal-profile-hero::after {
+            content: '';
+            position: absolute;
+            background-color: rgba(91, 109, 224, 0.08);  
+            border-radius: 50%;
+            filter: blur(55px);  
+            z-index: 0;
+        }
+        .personal-profile-hero::before {
+            top: -70px;
+            left: -70px;
+            width: 200px;
+            height: 200px;
+        }
+        .personal-profile-hero::after {
+            bottom: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+        }
+
+        .profile-content-wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .profile-avatar {
+            width: 110px;  
+            height: 110px;
+            border-radius: 50%;
+            background-color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            border: 5px solid #6366f1;  
+            box-shadow: 0 0 0 8px rgba(91, 109, 224, 0.2);  
+            overflow: hidden;
+        }
+
+        .profile-avatar i {
+            font-size: 4.5rem;  
+            color: #a0aec0;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-greeting {
+            font-size: 2.8rem; /* text-4xl even larger */
+            font-weight: 900; /* Black font weight */
+            color: #2c3e50; /* Darker text */
+            margin-bottom: 0.8rem;
+            line-height: 1.1;
+            letter-spacing: -0.02em;  
+        }
+
+        .profile-tagline {
+            font-size: 1.35rem; /* text-lg significantly increased */
+            color: #5d7486; /* Softer gray for tagline */
+            margin-bottom: 2.5rem;
+        }
+
+        .profile-details-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem 3rem; /* More space */
+            width: 100%;
+            max-width: 600px; /* Wider limit */
+            margin-bottom: 2.5rem;
+        }
+
+        .profile-detail-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-detail-label {
+            font-size: 0.95rem; /* text-sm slightly larger */
+            color: #7f8c8d; /* Muted gray */
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .profile-detail-value {
+            font-size: 1.1rem; /* base text slightly larger */
+            color: #2c3e50; /* Darker text */
+            font-weight: 700;
+        }
+
+        /* Profile actions button */
+        .profile-actions .btn-primary {
+            background-color: #5b6de0; /* Vibrant indigo */
+            border-color: #5b6de0;
+            font-weight: 700; /* Bold */
+            padding: 0.85rem 1.75rem;
+            border-radius: 0.85rem; /* More rounded */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(91, 109, 224, 0.3);
+        }
+        .profile-actions .btn-primary:hover {
+            background-color: #4a5ed9;
+            border-color: #4a5ed9;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(91, 109, 224, 0.5);
+        }
+
+
+        /* Responsive Adjustments */
+        @media (min-width: 768px) { /* md breakpoint */
+            .personal-profile-hero {
+                flex-direction: row;
+                text-align: left;
+                justify-content: space-between;
+                align-items: flex-start;
+                padding: 4rem; /* More padding */
+            }
+
+            .profile-content-wrapper {
+                flex-direction: row;
+                align-items: flex-start;
+                text-align: left;
+                gap: 3rem; /* More space between avatar and text */
+            }
+
+            .profile-greeting {
+                font-size: 3.5rem; /* text-5xl larger */
+            }
+
+            .profile-tagline {
+                font-size: 1.5rem; /* text-xl larger */
+            }
+
+            .profile-details-grid {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: none;
+                margin-left: 0;
+                margin-right: auto;
+            }
+
+            .profile-detail-item {
+                align-items: flex-start;
+            }
+
+            .profile-actions {
+                margin-left: auto;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                min-height: auto;
+                position: relative;
+                box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            }
+            .user-info { padding: 1.25rem; }
+            .main-content-wrapper {
+                margin-left: 0;
+                padding: 1.75rem;
+            }
+            .main-content-section {
+                padding: 1.75rem;
+            }
+            .page-header {
+                font-size: 1.8rem;
+                margin-bottom: 1.75rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .page-header .btn { margin-top: 0.8rem; width: 100%; }
+
+            .dashboard-cards-grid {
+                grid-template-columns: 1fr;
+                gap: 1.75rem;
+            }
+        }
+
+        /* Attendance Specific Styles */
+        .filter-section {
+            background-color: #ffffff;
+            border-radius: 1.25rem;
+            padding: 2rem;
+            box-shadow: 0 8px 20px -6px rgba(0,0,0,0.1), 0 4px 10px -4px rgba(0,0,0,0.05);
+            margin-bottom: 2.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: flex-end;
+        }
+        .filter-group {
+            flex: 1;
+            min-width: 220px;
+        }
+        .filter-group label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #4a6572;
+            margin-bottom: 0.7rem;
+        }
+        .filter-group input, .filter-group select {
+            padding: 0.85rem 1.25rem;
+            border: 1px solid #c8d9e6; /* Softer border color */
+            border-radius: 0.75rem;
+            font-size: 1.05rem;
+            color: #2c3e50;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: #f7f9fc; /* Light background for inputs */
+        }
+        .filter-group input:focus, .filter-group select:focus {
+            outline: none;
+            border-color: #5b6de0;
+            box-shadow: 0 0 0 5px rgba(91, 109, 224, 0.3); /* Stronger, colored focus ring */
+            background-color: #ffffff;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+        .filter-buttons .btn {
+            padding: 0.9rem 1.5rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+        .filter-buttons .btn-primary {
+            background-color: #5b6de0;
+            color: white;
+            border-color: #5b6de0;
+        }
+        .filter-buttons .btn-primary:hover {
+            background-color: #4a5ed9;
+            border-color: #4a5ed9;
+            box-shadow: 0 6px 12px rgba(91, 109, 224, 0.45);
+            transform: translateY(-3px);
+        }
+        .filter-buttons .btn-outline-primary {
+            background-color: transparent;
+            border: 1px solid #5b6de0;
+            color: #5b6de0;
+        }
+        .filter-buttons .btn-outline-primary:hover {
+            background-color: #e0e7ff;
+            color: #4a5ed9;
+            transform: translateY(-3px);
+        }
+
+        /* Table Styling for Attendance and Schedule */
+        .custom-table-responsive {
+            margin-top: 2.5rem;
+            border-radius: 1.25rem;
+            overflow-x: auto;
+            border: 1px solid #e0e7ff;
+            box-shadow: 0 10px 25px -8px rgba(0,0,0,0.15), 0 5px 10px -4px rgba(0,0,0,0.08);
+            background-color: #ffffff;
+        }
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .custom-table thead th {
+            background-color: #3498db; /* Lighter header background */
+            color: #2c3e50;
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding: 1.5rem 2rem; /* More padding */
+            border-bottom: 2px solid #e7eff6;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.08em; /* More letter spacing */
+        }
+        .custom-table tbody td {
+            padding: 1.5rem 2rem;
+            color: #4a6572;
+            font-size: 1rem;
+            border-bottom: 1px solid #f0f2f5; /* Very light border */
+        }
+        .custom-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .custom-table tbody tr:hover {
+            background-color: #fcf8e3; /* Light yellow on hover for better visibility */
+            cursor: pointer;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .status-present { background-color: #d4edda; color: #28a745; border: 1px solid #c3e6cb; }
+        .status-absent { background-color: #f8d7da; color: #dc3545; border: 1px solid #f5c6cb; }
+        .status-late { background-color: #fff3cd; color: #ffc107; border: 1px solid #ffeeba; }
+        .status-excused { background-color: #cfe2ff; color: #007bff; border: 1px solid #b9d3f1; }
+
+        /* Camera Modal specific styles */
+        .camera-modal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+        .camera-video {
+            width: 100%;
+            max-width: 560px;
+            height: auto;
+            border-radius: 1rem;
+            background-color: #000;
+            margin-bottom: 1.75rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            border: 3px solid #5b6de0; /* Thicker, more vibrant border */
+        }
+        .camera-message {
+            font-size: 1.15rem;
+            color: #4a6572;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+        #captureAttendance {
+            background-color: #5b6de0;
+            color: white;
+            border-color: #5b6de0;
+            font-weight: 700;
+            padding: 0.95rem 1.85rem;
+            border-radius: 0.85rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(91, 109, 224, 0.35);
+        }
+        #captureAttendance:hover {
+            background-color: #4a5ed9;
+            border-color: #4a5ed9;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(91, 109, 224, 0.55);
+        }
+
+        /* Custom Alert Modal Enhancements */
+        #custom-alert-header {
+            background-color: #f7f9fc;
+            border-bottom: 1px solid #e7eff6;
+            color: #2c3e50;
+            font-weight: 700;
+            padding: 1.5rem 1.75rem;
+        }
+        #custom-alert-title {
+            font-size: 1.35rem;
+        }
+        #custom-alert-body {
+            padding: 1.75rem;
+            color: #4a6572;
+            font-size: 1.05rem;
+        }
+        .modal-footer .btn-primary {
+            background-color: #5b6de0;
+            color: white;
+            border-color: #5b6de0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modal-footer .btn-primary:hover {
+            background-color: #4a5ed9;
+            border-color: #4a5ed9;
+            transform: translateY(-2px);
+        }
+        .modal-content {
+            border-radius: 1.25rem;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25), 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .modal-header .btn-close {
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            background-color: #e0e7ff;
+            opacity: 0.8;
+            transition: all 0.2s ease;
+        }
+        .modal-header .btn-close:hover {
+            opacity: 1;
+            background-color: #c7d2fe;
+        }
+
+        /* Edit Profile Modal Specifics */
+        #editProfileModal .form-label {
+            font-weight: 600;
+            color: #4a6572;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        #editProfileModal .form-control {
+            border-radius: 0.75rem;
+            padding: 0.85rem 1.15rem;
+            border: 1px solid #c8d9e6;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: #f7f9fc;
+        }
+        #editProfileModal .form-control:focus {
+            border-color: #5b6de0;
+            box-shadow: 0 0 0 4px rgba(91, 109, 224, 0.3);
+            background-color: #ffffff;
+        }
+
+
+        @media (max-width: 480px) {
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 1.5rem;
+            }
+            .filter-group {
+                min-width: unset;
+            }
+            .filter-buttons {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .custom-card, .main-content-section {
+                padding: 1.5rem;
+            }
+            .personal-profile-hero {
+                padding: 2.25rem;
+            }
+            .profile-greeting {
+                font-size: 2.25rem;
+            }
+            .profile-tagline {
+                font-size: 1.1rem;
+            }
+            .custom-table thead th, .custom-table tbody td {
+                padding: 1rem 1.25rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="sidebar">
+        <div class="user-info">
+             <h2>Student Profile</h2>
+
+            <div class="user-id" id="studentNumberDisplay">{{ student.studentNumber }} </div>
+            <div class="user-name" id="studentNameDisplay">{{ student.firstName }} {{ student.lastName }}</div>
+        </div>
+
+        <div class="divider"></div> <!-- Styled separator -->
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#" class="nav-link active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-section="attendance">
+                    <i class="fas fa-check-circle"></i> Attendance
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-section="schedule">
+                    <i class="fas fa-calendar-alt"></i> Time Table
+                </a>
+            </li>
+            
+        </ul>
+        <form class="logout-form" action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger w-100 flex items-center justify-center">
+                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
+        </form>
+    </div>
+
+    <div class="main-content-wrapper">
+        <div class="main-content-section" id="dashboard-content" style="display:block;">
+            <div class="page-header">Dashboard</div>
+            <div class="dashboard-cards-grid">
+                <div class="custom-card">
+                    <div class="custom-card-header">My Attendance Summary</div>
+                    <div class="custom-card-content text-center">
+                        <div id="attendance-summary-content">
+                            <p class="text-center text-gray-500 py-8">Loading attendance summary...</p>
+                        </div>
+                        <p class="text-sm text-indigo-600 hover:underline cursor-pointer mt-4" onclick="navigateToSection('attendance')">View full attendance history...</p>
+                    </div>
+                </div>
+
+                <div class="custom-card">
+                    <div class="custom-card-header">Quick Links</div>
+                    <div class="custom-card-content">
+                        <ul class="space-y-3">
+                            <li><a href="#" class="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center transition-colors duration-200" onclick="navigateToSection('schedule')"><i class="fas fa-calendar-alt w-5 h-5 mr-2 flex-shrink-0"></i> View Class Schedule</a></li>
+                            <li><a href="#" class="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center transition-colors duration-200"><i class="fas fa-envelope w-5 h-5 mr-2 flex-shrink-0"></i> Contact Lecturer</a></li>
+                         </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content-section" id="attendance-content" style="display:none;">
+            <div class="page-header">Attendance Records</div>
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label for="filter-date">Date:</label>
+                    <input type="date" id="filter-date" class="form-control">
+                </div>
+                <div class="filter-group">
+                    <label for="filter-subject">Subject:</label>
+                    <select id="filter-subject" class="form-control">
+                        <option value="">All Subjects</option>
+                        {# Subjects will be populated by JavaScript #}
+                    </select>
+                </div>
+                <div class="filter-buttons">
+                    <button id="apply-filters" class="btn btn-primary flex items-center">
+                        <i class="fas fa-filter mr-2"></i> Apply Filters
+                    </button>
+                    <button id="reset-filters" class="btn btn-outline-primary flex items-center">
+                        <i class="fas fa-redo mr-2"></i> Reset Filters
+                    </button>
+                </div>
+                
+                <div class="filter-buttons">
+                    <a id="download-attendance-link" href="{% url 'download_attendance' %}" class="btn btn-outline-primary flex items-center">
+                        <i class="fas fa-download mr-2"></i> Download Attendance
+                    </a>
+                </div>
+            </div>
+
+            <div class="custom-table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-table-body">
+                        <tr>
+                            <td colspan="3" class="text-center py-8 text-gray-500">Loading attendance records...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="main-content-section" id="schedule-content" style="display:none;">
+            <div class="page-header">Class Schedule</div>
+            <div class="custom-table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Day</th>
+                            <th>Time</th>
+                            <th>Room</th>
+                            <th>Lecturer</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody id="schedule-table-body">
+                        <tr>
+                            <td colspan="5" class="text-center py-8 text-gray-500">No class sessions scheduled.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="filter-buttons">
+                <a href="{% url 'download_timetable' %}" class="btn btn-primary flex items-center">
+                    <i class="fas fa-download mr-2"></i> Download Timetable
+                </a>
+            </div>
+
+        </div>
+            
+            
+    </div>
+
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProfileForm">
+                        {% csrf_token %} {# Django CSRF token #}
+                        <div class="mb-3">
+                            <label for="editFirstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="editFirstName" name="first_name" value="{{ student.firstName }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="editLastName" name="last_name" value="{{ student.lastName }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="editEmail" name="email" value="{{ student.email }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editProgram" class="form-label">Program of Study</label>
+                            <input type="text" class="form-control" id="editProgram" name="program" value="{{ student.program }}">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveProfileChanges">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="custom-alert-modal" tabindex="-1" aria-labelledby="customAlertModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" id="custom-alert-header">
+                    <h5 class="modal-title" id="custom-alert-title">Alert</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="custom-alert-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="cameraAttendanceModal" tabindex="-1" aria-labelledby="cameraAttendanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cameraAttendanceModalLabel">Mark Attendance</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeCameraModal"></button>
+                </div>
+                <div class="modal-body camera-modal-content">
+                    <p class="camera-message">Please look at the camera to mark your attendance for <strong id="current-class-name"></strong>.</p>
+                    <video id="cameraFeed" class="camera-video" autoplay playsinline></video>
+                    <button id="captureAttendance" class="btn btn-primary mt-3">Capture Attendance</button>
+                    <canvas id="cameraCanvas" style="display:none;"></canvas> {# Hidden canvas for capturing frame #}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelCameraModal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Django json_script tags for data #}
+    {{ subjects|json_script:"subjects_data" }}
+    {{ attendance_records|json_script:"attendance_records_data" }}
+    {{ class_schedule|json_script:"class_schedule_data" }}
+
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Utility function to display custom alerts
+        function showAlert(title, message, type = 'info') {
+            const alertModalElement = document.getElementById('custom-alert-modal');
+            const alertModal = new bootstrap.Modal(alertModalElement);
+            const alertTitle = document.getElementById('custom-alert-title');
+            const alertBody = document.getElementById('custom-alert-body');
+            const alertHeader = document.getElementById('custom-alert-header');
+
+            alertTitle.textContent = title;
+            alertBody.innerHTML = message; 
+
+            // Set header background based on type
+            alertHeader.className = 'modal-header'; // Reset classes
+            if (type === 'success') {
+                alertHeader.classList.add('bg-success', 'text-white');
+            } else if (type === 'danger') {
+                alertHeader.classList.add('bg-danger', 'text-white');
+            } else if (type === 'warning') {
+                alertHeader.classList.add('bg-warning', 'text-dark');
+            } else if (type === 'info') {
+                alertHeader.classList.add('bg-info', 'text-white'); // Added info specific class
+            } else { // default primary
+                alertHeader.classList.add('bg-primary', 'text-white');
+            }
+
+            alertModal.show();
+        }
+
+        // --- Data Parsing (from Django's json_script tags) ---
+        const allSubjects = JSON.parse(document.getElementById('subjects_data').textContent);
+        let allAttendanceRecords = JSON.parse(document.getElementById('attendance_records_data').textContent);
+        const allClassSchedule = JSON.parse(document.getElementById('class_schedule_data').textContent);
+
+        // --- Main Dashboard Logic Class ---
+        class DashboardManager {
+            constructor() {
+                this.navLinks = document.querySelectorAll('.nav-link');
+                this.filterDateInput = document.getElementById('filter-date');
+                this.filterSubjectSelect = document.getElementById('filter-subject');
+                this.applyFiltersButton = document.getElementById('apply-filters');
+                this.resetFiltersButton = document.getElementById('reset-filters');
+                this.attendanceTableBody = document.getElementById('attendance-table-body');
+                this.scheduleTableBody = document.getElementById('schedule-table-body');
+                this.attendanceSummaryContent = document.getElementById('attendance-summary-content');
+
+                this.cameraFeed = document.getElementById('cameraFeed');
+                this.cameraCanvas = document.getElementById('cameraCanvas');
+                this.captureAttendanceButton = document.getElementById('captureAttendance');
+                this.cameraAttendanceModalElement = document.getElementById('cameraAttendanceModal');
+                this.closeCameraModalButton = document.getElementById('closeCameraModal');
+                this.cancelCameraModalButton = document.getElementById('cancelCameraModal');
+                this.currentClassNameDisplay = document.getElementById('current-class-name');
+
+                this.initEventListeners();
+                this.renderInitialContent();
+                this.checkAndAutoOpenAttendanceModal();  
+            }
+
+            initEventListeners() {
+                // Sidebar Navigation
+                this.navLinks.forEach(link => {
+                    link.addEventListener('click', this.handleNavLinkClick.bind(this));
+                });
+
+                // Attendance Filters
+                this.applyFiltersButton.addEventListener('click', this.renderAttendanceRecords.bind(this));
+                this.resetFiltersButton.addEventListener('click', this.resetAttendanceFilters.bind(this));
+
+                // Camera Modal
+                this.captureAttendanceButton.addEventListener('click', this.handleCaptureAttendance.bind(this));
+                this.cameraAttendanceModalElement.addEventListener('hidden.bs.modal', this.stopCamera.bind(this));
+                // show.bs.modal listener is now handled by checkAndAutoOpenAttendanceModal
+                this.closeCameraModalButton.addEventListener('click', this.stopCamera.bind(this));
+                this.cancelCameraModalButton.addEventListener('click', this.stopCamera.bind(this));
+            }
+
+            renderInitialContent() {
+                // Default to dashboard view on load
+                this.navigateToSection('dashboard');
+            }
+
+            handleNavLinkClick(event) {
+                event.preventDefault();
+                const section = event.currentTarget.dataset.section;
+
+                // Remove 'active' from all nav links
+                this.navLinks.forEach(nav => nav.classList.remove('active'));
+                // Add 'active' to the clicked nav link
+                event.currentTarget.classList.add('active');
+
+                // Hide all content sections
+                document.querySelectorAll('.main-content-section').forEach(sec => sec.style.display = 'none');
+                // Show the relevant content section
+                if (section) {
+                    document.getElementById(`${section}-content`).style.display = 'block';
+                }
+
+                // Special handling for data loading based on section
+                if (section === 'attendance') {
+                    this.populateSubjectFilter();
+                    this.renderAttendanceRecords();
+                } else if (section === 'schedule') {
+                    this.renderClassSchedule();
+                } else if (section === 'dashboard') {
+                    this.renderAttendanceSummary();
+                }
+            }
+
+            navigateToSection(sectionId) {
+                const targetLink = document.querySelector(`.nav-link[data-section="${sectionId}"]`);
+                if (targetLink) {
+                    targetLink.click();
+                }
+            }
+
+            // --- Attendance Tab Functionality ---
+            populateSubjectFilter() {
+                this.filterSubjectSelect.innerHTML = '<option value="">All Subjects</option>'; // Clear existing options
+                const uniqueSubjects = new Set();
+                allSubjects.forEach(subject => uniqueSubjects.add(subject.course_name));
+
+                uniqueSubjects.forEach(subjectName => {
+                    const option = document.createElement('option');
+                    option.value = subjectName;
+                    option.textContent = subjectName;
+                    this.filterSubjectSelect.appendChild(option);
+                });
+            }
+
+            renderAttendanceRecords() {
+                this.attendanceTableBody.innerHTML = ''; // Clear existing rows
+
+                let filteredRecords = [...allAttendanceRecords]; // Use a copy to filter
+
+                // Apply filters
+                const filterDate = this.filterDateInput.value;
+                const filterSubject = this.filterSubjectSelect.value;
+
+                if (filterDate) {
+                    filteredRecords = filteredRecords.filter(record => {
+                        const recordDate = new Date(record.date_time).toISOString().split('T')[0];
+                        return recordDate === filterDate;
+                    });
+                }
+
+                if (filterSubject) {
+                    filteredRecords = filteredRecords.filter(record => record.course_name === filterSubject);
+                }
+
+                if (filteredRecords.length === 0) {
+                    
+                    this.attendanceTableBody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-gray-500">No attendance records found for the selected filters.</td></tr>`;
+                    return;
+                }
+
+                filteredRecords.forEach(record => {
+                    const row = document.createElement('tr');
+                    const statusClass = record.status ? `status-${record.status.toLowerCase()}` : '';
+                    const displayDateTime = new Date(record.date_time).toLocaleString('en-ZA', {
+                        year: 'numeric', month: 'short', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+
+                    row.innerHTML = `
+                        <td>${record.course_name} (${record.course_code})</td>
+                        <td>${displayDateTime}</td>
+                        <td><span class="status-badge ${statusClass}">${record.status}</span></td>
+                        <!-- Removed image_data_url display -->
+                    `;
+                    this.attendanceTableBody.appendChild(row);
+                });
+            }
+
+            resetAttendanceFilters() {
+                this.filterDateInput.value = '';
+                this.filterSubjectSelect.value = '';
+                this.renderAttendanceRecords();
+            }
+
+            // --- Class Schedule Tab Functionality ---
+            renderClassSchedule() {
+                this.scheduleTableBody.innerHTML = ''; // Clear existing rows
+
+                if (allClassSchedule.length === 0) {
+                     
+                    this.scheduleTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-500">No class sessions scheduled.</td></tr>`;
+                    return;
+                }
+
+                 
+                const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']; 
+                const sortedSchedule = [...allClassSchedule].sort((a, b) => {
+                    const dayA = dayOrder.indexOf(a.day_of_week);
+                    const dayB = dayOrder.indexOf(b.day_of_week);
+                    if (dayA !== dayB) return dayA - dayB;
+
+                    // Then by time
+                    const timeA = new Date(`2000/01/01 ${a.start_time}`); // Use dummy date for time comparison
+                    const timeB = new Date(`2000/01/01 ${b.start_time}`);
+                    return timeA - timeB;
+                });
+
+
+                sortedSchedule.forEach(session => {
+                    const row = document.createElement('tr');
+                    // No action button in the table
+                    row.innerHTML = `
+                        <td>${session.course_name} (${session.course_code})</td>
+                        <td>${session.day_of_week}</td>
+                        <td>${session.start_time} - ${session.end_time}</td>
+                        <td>${session.room}</td>
+                        <td>${session.lecturer_name}</td>
+                    `;
+                    this.scheduleTableBody.appendChild(row);
+                });
+                // Removed event listener for Mark Attendance buttons as they are no longer in the table
+            }
+
+            // --- Dashboard Attendance Summary Logic ---
+            renderAttendanceSummary() {
+                if (allAttendanceRecords.length === 0) {
+                    this.attendanceSummaryContent.innerHTML = `<p class="text-center text-gray-500 py-4">No attendance records to display yet.</p>`;
+                    return;
+                }
+
+                const totalSessions = allAttendanceRecords.length;
+                const presentCount = allAttendanceRecords.filter(r => r.status === 'Present').length;
+                const absentCount = allAttendanceRecords.filter(r => r.status === 'Absent').length;
+                const lateCount = allAttendanceRecords.filter(r => r.status === 'Late').length;
+
+                const presentPercentage = totalSessions > 0 ? ((presentCount / totalSessions) * 100).toFixed(1) : 0;
+
+                this.attendanceSummaryContent.innerHTML = `
+                    <div class="flex items-center justify-center space-x-4 mb-4">
+                        <div class="text-left">
+                            <p class="text-4xl font-extrabold text-indigo-600">${presentPercentage}%</p>
+                            <p class="text-sm text-gray-500">Attendance Rate</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <p class="text-left"><strong>Total Sessions:</strong> ${totalSessions}</p>
+                        <p class="text-left"><strong>Present:</strong> <span class="status-badge status-present">${presentCount}</span></p>
+                        <p class="text-left"><strong>Absent:</strong> <span class="status-badge status-absent">${absentCount}</span></p>
+                        <p class="text-left"><strong>Late:</strong> <span class="status-badge status-late">${lateCount}</span></p>
+                    </div>
+                `;
+            }
+
+            // --- Camera & Attendance Marking Logic ---
+            async startCamera() {
+                try {
+                    this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                    this.cameraFeed.srcObject = this.stream;
+                    this.cameraFeed.play();
+                } catch (err) {
+                    console.error("Error accessing camera: ", err);
+                    showAlert("Camera Error", "Could not access your camera. Please ensure it's connected and you've granted permission. (Error: " + err.name + ")", "danger");
+                }
+            }
+
+            stopCamera() {
+                if (this.cameraFeed.srcObject) {
+                    this.cameraFeed.srcObject.getTracks().forEach(track => track.stop());
+                    this.cameraFeed.srcObject = null;
+                }
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+                }
+            }
+
+            async handleCaptureAttendance() {
+                const context = this.cameraCanvas.getContext('2d');
+                const sessionId = this.captureAttendanceButton.dataset.sessionId;
+
+                if (!sessionId) {
+                    showAlert("Error", "No class session selected for attendance.", "danger");
+                    return;
+                }
+
+                if (!this.cameraFeed.srcObject) {
+                    showAlert("Error", "Camera feed not active. Please open the modal again to restart the camera.", "danger");
+                    return;
+                }
+
+                this.cameraCanvas.width = this.cameraFeed.videoWidth;
+                this.cameraCanvas.height = this.cameraFeed.videoHeight;
+                context.drawImage(this.cameraFeed, 0, 0, this.cameraCanvas.width, this.cameraCanvas.height);
+
+                const imageDataUrl = this.cameraCanvas.toDataURL('image/jpeg', 0.8);
+
+                showAlert("Marking Attendance", "Please wait while your attendance is being recorded...", "info");
+                this.captureAttendanceButton.disabled = true;
+
+                // --- Send image data to Django backend ---
+                try {
+                    const response = await fetch('/api/mark-attendance/', { //  Django API endpoint
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken') // Function to get CSRF token
+                        },
+                        body: JSON.stringify({
+                            session_id: sessionId,
+                            image_data: imageDataUrl // Base64 encoded image
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showAlert("Success!", `Attendance marked as ${data.status} for ${data.course_name}.`, "success");
+                        // Add or update the record in the local allAttendanceRecords array
+                        const existingRecordIndex = allAttendanceRecords.findIndex(rec => rec.session_id === sessionId);
+                        if (existingRecordIndex > -1) {
+                            allAttendanceRecords[existingRecordIndex] = data.new_record;
+                        } else {
+                            allAttendanceRecords.push(data.new_record);
+                        }
+                        this.renderAttendanceRecords(); // Re-render attendance section if active
+                        this.renderAttendanceSummary(); // Re-render dashboard summary
+                        const cameraModalInstance = bootstrap.Modal.getInstance(this.cameraAttendanceModalElement);
+                        if (cameraModalInstance) cameraModalInstance.hide();
+                    } else {
+                        showAlert("Attendance Failed", data.error || "An error occurred while marking attendance.", "danger");
+                    }
+                } catch (error) {
+                    console.error('Error marking attendance:', error);
+                    showAlert("Network Error", "Could not connect to the server. Please check your internet connection.", "danger");
+                } finally {
+                    this.captureAttendanceButton.disabled = false; // Re-enable button
+                    this.stopCamera(); // Stop camera regardless of success/failure
+                }
+            }
+
+            checkAndAutoOpenAttendanceModal() {
+                const now = new Date();
+                const currentDayIndex = now.getDay(); // 0 for Sunday, 1 for Monday, etc.
+                const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+                let activeSessionFound = false;
+
+                for (const session of allClassSchedule) {
+                    const sessionDayIndex = dayOrder.indexOf(session.day_of_week);
+
+                    // Only check if it's the current day of the week
+                    if (sessionDayIndex === currentDayIndex) {
+                        const sessionStart = new Date();
+                        const sessionEnd = new Date();
+
+                        const [startHours, startMinutes] = session.start_time.split(':').map(Number);
+                        const [endHours, endMinutes] = session.end_time.split(':').map(Number);
+
+                        sessionStart.setHours(startHours, startMinutes, 0, 0);
+                        sessionEnd.setHours(endHours, endMinutes, 0, 0);
+
+                        // Give a grace period of 10 minutes *after* the class starts for automatic popup
+                        const gracePeriodEnd = new Date(sessionStart.getTime() + (10 * 60 * 1000)); // 10 minutes after start
+
+                        // Check if current time is within the session start and grace period
+                        if (now >= sessionStart && now <= gracePeriodEnd) {
+                            this.currentClassNameDisplay.textContent = `${session.course_name} (${session.day_of_week} ${session.start_time})`;
+                            this.captureAttendanceButton.dataset.sessionId = session.id;
+
+                            const cameraModal = new bootstrap.Modal(this.cameraAttendanceModalElement);
+                            cameraModal.show();
+                            this.startCamera();
+                            activeSessionFound = true;
+                            break; // Open modal for the first active session found and stop
+                        }
+                    }
+                }
+
+                if (!activeSessionFound) {
+                    // Display the message using showAlert if no active session is found
+                    showAlert("No Active Class", "No active class session found for automatic attendance marking. You can proceed with other dashboard functions.", "info");
+                }
+            }
+        }
+
+        // --- Profile Edit Logic Class (adapted for Django backend interaction) ---
+        class ProfileManager {
+            constructor() {
+                this.editProfileModalElement = document.getElementById('editProfileModal');
+                this.editProfileForm = document.getElementById('editProfileForm');
+                this.editProfileModal = null;
+                this.saveProfileChangesButton = document.getElementById('saveProfileChanges');
+                this.init();
+            }
+
+            init() {
+                this.editProfileModal = new bootstrap.Modal(this.editProfileModalElement);
+                this.saveProfileChangesButton.addEventListener('click', this.handleFormSubmit.bind(this));
+            }
+
+            async handleFormSubmit(event) {
+                event.preventDefault(); // Prevent default form submission from button click
+
+                const formData = new FormData(this.editProfileForm);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    showAlert("Updating Profile", "Saving your changes...", "info");
+                    const response = await fetch('/api/update-student-profile/', { //   Django API endpoint
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showAlert('Success', result.message, 'success');
+                        this.updateDisplayInfo(data); // Update displayed info on the page
+                        this.editProfileModal.hide(); // Hide the modal
+                    } else {
+                        showAlert('Error', result.error || 'Failed to update profile.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    showAlert("Network Error", "Could not connect to the server. Please try again.", "danger");
+                }
+            }
+
+            updateDisplayInfo(updatedData) {
+                // Update the displayed profile info on the sidebar and form
+                document.getElementById('editFirstName').value = updatedData.first_name;
+                document.getElementById('editLastName').value = updatedData.last_name;
+                document.getElementById('editEmail').value = updatedData.email;
+                document.getElementById('editProgram').value = updatedData.program;
+
+                 
+                document.getElementById('studentNameDisplay').textContent = `${updatedData.first_name} ${updatedData.last_name}`;
+            }
+        }
+
+
+        // Initialize all managers when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new DashboardManager();
+            new ProfileManager();
+        });
+
+        // Function to get CSRF token (required for Django POST requests)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                     
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.getElementById('filter-date');
+            const subjectSelect = document.getElementById('filter-subject');
+            const downloadLink = document.getElementById('download-attendance-link');
+
+            function updateDownloadLink() {
+                const date = dateInput.value;
+                const subject = subjectSelect.value;
+                let url = "{% url 'download_attendance' %}";
+                const params = [];
+                if (date) params.push('date=' + encodeURIComponent(date));
+                if (subject) params.push('subject=' + encodeURIComponent(subject));
+                if (params.length > 0) url += '?' + params.join('&');
+                downloadLink.href = url;
+            }
+
+            dateInput.addEventListener('change', updateDownloadLink);
+            subjectSelect.addEventListener('change', updateDownloadLink);
+
+            // Initialize on page load
+            updateDownloadLink();
+        });
+
+    </script>
+</body>
+</html>

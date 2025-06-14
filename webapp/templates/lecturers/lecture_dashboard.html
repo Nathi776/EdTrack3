@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lecturer Dashboard</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom base styles - Inter font and antialiasing */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f0f2f5;  
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background-color:#3498db;
+            color: #e2e8f0; /* Lighter text for contrast */
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 24px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25); /* Deeper shadow */
+            transition: transform 0.3s ease-in-out;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar .top-section {
+            margin-bottom: 2.5rem; /* More space */
+        }
+
+        .user-info {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #2d3748; /* Darker border for separation */
+            margin-bottom: 24px;
+        }
+        .user-id {
+            font-size: 0.875rem; /* text-sm */
+            color: #a0aec0; /* Tailwind gray-400 */
+        }
+        .user-name {
+            font-size: 1.35rem; /* Slightly larger */
+            font-weight: 700; /* Bold */
+            margin-top: 8px;
+            color: #ffffff;
+        }
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+        .nav-item {
+            margin-bottom: 12px; /* Increased spacing */
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 18px;  
+            color: #ffffff; 
+            text-decoration: none;
+            border-radius: 0.625rem; /* Slightly more rounded */
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .nav-link i {
+            margin-right: 0.85rem; /* More space for icons */
+            width: 1.25rem; /* Slightly larger icons */
+            height: 1.25rem;
+            stroke-width: 2;
+        }
+        .nav-link:hover {
+            background-color: #2980b9;  
+            color: #ffffff;
+            transform: translateX(5px);  
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow on hover */
+        }
+        .nav-link.active {
+            background-color: #2980b9;  
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(76, 81, 191, 0.4); /* Stronger, colored shadow for active */
+            font-weight: 600; /* Semibold for active */
+        }
+        .logout-button-container {
+            margin-top: auto;
+            padding-top: 1.5rem; /* More space above logout */
+        }
+        .logout-button-container button {
+            background-color: #e53e3e; /* Stronger red */
+            box-shadow: 0 4px 10px rgba(229, 62, 62, 0.3); /* Red shadow */
+        }
+        .logout-button-container button:hover {
+            background-color: #c53030; /* Darker red on hover */
+            box-shadow: 0 6px 15px rgba(229, 62, 62, 0.4);
+        }
+        .logout-button-container button i {
+            margin-right: 0.6rem;
+        }
+
+        /* Main content area */
+        .main-content-wrapper {
+            margin-left: 250px;
+            padding: 0;
+            transition: margin-left 0.3s ease-in-out;
+           background-image: url("{% static 'css/lecture_background.jpg' %}");
+           background-size: cover;
+            min-height: 100vh;
+        }
+
+        /* Individual content sections within the wrapper */
+        .main-content-section {
+            padding: 30px; /* More generous padding */
+        }
+        
+        /* Page Header for each section */
+        .page-header {
+            background-color: #ffffff;
+            box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.1), 0 6px 10px -5px rgba(0, 0, 0, 0.08); /* Deeper, softer shadow */
+            border-radius: 1rem; /* More rounded */
+            padding: 1.5rem 2rem; /* More padding */
+            margin-bottom: 2.5rem; /* More space below header */
+            border-left: 6px solid #4c51bf; /* Accent border on the left */
+        }
+        @media (min-width: 768px) {
+            .page-header {
+                padding: 2rem 2.5rem; /* Even more padding on larger screens */
+                margin-bottom: 3rem;
+            }
+        }
+        .page-title {
+            font-size: 2rem; /* Larger title */
+            font-weight: 800; /* Extra bold */
+            color: #1a202c; /* Darker text */
+        }
+        @media (min-width: 640px) {
+            .page-title {
+                font-size: 2.5rem; /* Even larger on small-medium screens */
+            }
+        }
+        .page-subtitle {
+            font-size: 1rem; /* Base text size */
+            color: #4a5568; /* Slightly darker gray */
+            margin-top: 0.5rem; /* More space */
+            line-height: 1.5;
+        }
+         @media (min-width: 640px) {
+             .page-subtitle {
+                 font-size: 1.125rem; /* Slightly larger on sm screens and up */
+             }
+         }
+
+
+        /* Dashboard cards grid */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Adjusted minmax for better fit */
+            gap: 2rem; /* More generous gap */
+        }
+
+        /* Card styling */
+        .card {
+            background: #ffffff;
+            border-radius: 1rem; /* More rounded */
+            padding: 2rem; /* More padding */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Softer, more diffused shadow */
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smooth cubic-bezier transition */
+            border: 1px solid #edf2f7; /* Subtle light border */
+        }
+        .card:hover {
+            transform: translateY(-8px); /* More lift */
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); /* More pronounced shadow on hover */
+        }
+        .card-header {
+            font-size: 1.35rem; /* Larger header */
+            font-weight: 700; /* Bold */
+            margin-bottom: 1.25rem; /* More space */
+            color: #3182ce; /* A slightly brighter blue */
+            border-bottom: 1px solid #e2e8f0; /* Lighter border */
+            padding-bottom: 1rem; /* More padding */
+        }
+        .card-content {
+            color: #4a5568; /* Darker gray for content */
+            line-height: 1.7; /* Increased line height for readability */
+        }
+        .card-content p {
+            margin-bottom: 0.75rem; /* More space */
+        }
+         .card-content p strong {
+            color: #2d3748; /* Even darker for strong text */
+           }
+
+
+        /* List item styling (courses, assessments, students) */
+        .list-item {
+            background: #fdfdfe; /* Very light, almost white background */
+            padding: 1.25rem; /* More padding */
+            margin-bottom: 0.85rem; /* Consistent spacing */
+            border-radius: 0.75rem; /* More rounded */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Softer shadow */
+            transition: all 0.3s ease;
+            border: 1px solid #ebf4ff; /* Very subtle light blue border */
+        }
+        .list-item:hover{
+            transform: translateY(-4px); /* Slight lift */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
+        }
+        .list-item-title {
+            font-size: 1.15rem; /* Slightly larger */
+            font-weight: 600; /* Semibold */
+            color: #2d3748; /* Darker text */
+            margin-bottom: 0.35rem;
+        }
+        .list-item-meta {
+            color: #718096; /* Medium gray */
+            font-size: 0.9rem; /* Slightly larger */
+        }
+        .list-item-details p {
+             color: #5f6b7a; /* Slightly darker gray for details */
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: 0.3rem;
+        }
+
+
+        /* Specific border colors for list items */
+        .course-item { border-left: 5px solid #3182ce; /* Brighter blue */ }
+        .assessment-item { border-left: 5px solid #d53f8c; /* Stronger pink */ }
+        .student-item { border-left: 5px solid #38a169; /* Stronger green */ }
+        .attendance-item { border-left: 5px solid #f6ad55; /* Orange for attendance */ }
+        .class-session-item { border-left: 5px solid #6366f1; /* Indigo for class sessions */ } /* NEW */
+        
+        .student-courses{
+            margin-top: 1rem;
+        }
+        .student-courses strong{
+            font-weight: 600;
+            color: #2d3748;
+        }
+        .student-courses ul {
+            list-style-type: disc;
+            list-style-position: inside;
+            padding-left: 0.75rem; /* More indent */
+            font-size: 0.875rem;
+            color: #4a5568;
+        }
+         .student-courses ul li {
+            margin-top: 0.35rem; /* More space */
+           }
+
+        /* Lecturer Profile Hero Section Styling */
+        .lecturer-profile-hero {
+            background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%); /* Soft indigo gradient */
+            border-radius: 1.25rem; /* Even more rounded corners */
+            padding: 3rem; /* More generous padding */
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2), 0 10px 15px -5px rgba(0,0,0,0.15); /* Deeper, more diffused shadow */
+            border: 1px solid #c7d2fe; /* Lighter indigo border */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 3rem; /* More space below this section */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lecturer-profile-hero::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: -60px;
+            width: 180px;
+            height: 180px;
+            background-color: rgba(255, 255, 255, 0.07); /* Slightly more opaque */
+            border-radius: 50%;
+            z-index: 0;
+            filter: blur(50px); /* More blur */
+        }
+
+        .lecturer-profile-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            right: -40px;
+            width: 120px;
+            height: 120px;
+            background-color: rgba(79, 70, 229, 0.05); /* Slightly more opaque */
+            border-radius: 50%;
+            z-index: 0;
+            filter: blur(40px);
+        }
+
+        .profile-content-wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .profile-avatar {
+            width: 110px; /* Larger avatar */
+            height: 110px;
+            border-radius: 50%;
+            background-color: #f8fafc; /* Lighter background */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.75rem; /* More space below avatar */
+            border: 4px solid #6366f1; /* Thicker border */
+            box-shadow: 0 0 0 6px rgba(79, 70, 229, 0.15); /* More pronounced halo */
+            overflow: hidden;
+        }
+
+        .profile-avatar i {
+            font-size: 4rem; /* Larger icon */
+            color: #94a3b8; /* Slightly darker gray */
+        }
+
+        .profile-greeting {
+            font-size: 2.75rem; /* Even larger greeting */
+            font-weight: 800;
+            color: #1a202c; /* Darker text */
+            margin-bottom: 0.75rem;
+            line-height: 1.1;
+        }
+
+        .profile-tagline {
+            font-size: 1.25rem; /* Larger tagline */
+            color: #4a5568; /* Darker gray */
+            margin-bottom: 2.5rem;
+        }
+
+        .profile-details-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem 2.5rem; /* More generous gaps */
+            width: 100%;
+            max-width: 550px; /* Slightly wider max-width */
+            margin-bottom: 2.5rem;
+        }
+
+        .profile-detail-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-detail-label {
+            font-size: 0.9rem; /* Slightly larger label */
+            color: #718096; /* Medium gray */
+            margin-bottom: 0.35rem;
+            font-weight: 500;
+        }
+
+        .profile-detail-value {
+            font-size: 1.05rem; /* Slightly larger value */
+            color: #2d3748; /* Darker value */
+            font-weight: 600;
+        }
+
+        /* Profile actions button */
+        .profile-actions button {
+            background-color: #4c51bf; /* Deeper indigo */
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            box-shadow: 0 6px 15px rgba(76, 81, 191, 0.3);
+        }
+        .profile-actions button:hover {
+            background-color: #4338ca; /* Darker indigo on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 81, 191, 0.4);
+        }
+
+        /* Filter and Download Section */
+        .filter-section {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+        .filter-group {
+            flex: 1;
+            min-width: 180px; /* Ensure filters don't get too small */
+        }
+        .filter-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+        .filter-group input, .filter-group select {
+            width: 100%;
+            padding: 0.65rem 1rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            color: #2d3748;
+            transition: all 0.2s ease;
+        }
+        .filter-group input:focus, .filter-group select:focus {
+            outline: none;
+            border-color: #4c51bf;
+            box-shadow: 0 0 0 3px rgba(76, 81, 191, 0.2);
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem; /* For mobile stacking */
+        }
+        .filter-buttons button, .filter-buttons a { /* Added 'a' for anchor buttons */
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-decoration: none; /* For anchor buttons */
+            display: inline-flex; /* For anchor buttons */
+            align-items: center; /* For anchor buttons */
+            justify-content: center; /* For anchor buttons */
+        }
+        .filter-buttons .btn-primary {
+            background-color: #4c51bf;
+            color: white;
+        }
+        .filter-buttons .btn-primary:hover {
+            background-color: #4338ca;
+            box-shadow: 0 4px 8px rgba(76, 81, 191, 0.3);
+        }
+        .filter-buttons .btn-outline {
+            background-color: transparent;
+            border: 1px solid #4c51bf;
+            color: #4c51bf;
+        }
+        .filter-buttons .btn-outline:hover {
+            background-color: #e0e7ff;
+            color: #4338ca;
+        }
+
+
+        /* Table Styling */
+        .custom-table-responsive {
+            margin-top: 1.5rem;
+            border-radius: 1rem; /* More rounded */
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+        }
+        .custom-table {
+            width: 100%;
+            border-collapse: separate; /* Allows border-radius on cells */
+            border-spacing: 0;
+        }
+        .custom-table thead th {
+            background-color: #f8fafc; /* Lighter header background */
+            color: #4a5568;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 1rem 1.5rem; /* More padding */
+            border-bottom: 2px solid #e2e8f0;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .custom-table tbody td {
+            padding: 1rem 1.5rem;
+            color: #4a5568;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #edf2f7; /* Very light border */
+        }
+        .custom-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .custom-table tbody tr:hover {
+            background-color: #fbfcfe; /* Subtle hover effect */
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.3rem 0.75rem;
+            border-radius: 9999px; /* Full rounded */
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        .status-present { background-color: #d1fae5; color: #065f46; } /* Green */
+        .status-absent { background-color: #fee2e2; color: #991b1b; } /* Red */
+        .status-late { background-color: #fffbeb; color: #92400e; } /* Yellow/Orange */
+        .status-excused { background-color: #e0e7ff; color: #3730a3; } /* Indigo */
+
+
+        /* Responsive adjustments */
+        @media (min-width: 768px) { /* md breakpoint */
+            .main-content-section {
+                padding: 30px; /* Consistent padding */
+            }
+            .dashboard-cards {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Adjusted minmax for better layout on larger screens */
+            }
+            .lecturer-profile-hero {
+                flex-direction: row;
+                text-align: left;
+                justify-content: space-between;
+                align-items: flex-start;
+                padding: 3.5rem 4rem;  
+            }
+
+            .profile-content-wrapper {
+                flex-direction: row;
+                align-items: flex-start;
+                text-align: left;
+                gap: 2.5rem;  
+            }
+
+            .profile-greeting {
+                font-size: 3.5rem; 
+            }
+
+            .profile-tagline {
+                font-size: 1.35rem;  
+            }
+
+            .profile-details-grid {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: none;
+                margin-left: 0;
+                margin-right: auto;
+            }
+
+            .profile-detail-item {
+                align-items: flex-start;
+            }
+
+            .profile-actions {
+                margin-left: auto;
+                flex-shrink: 0;
+            }
+            .filter-section {
+                flex-wrap: nowrap;  
+            }
+            .filter-buttons {
+                margin-top: 0;  
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content-section {
+                padding: 20px;  
+            }
+            .page-title {
+                font-size: 1.75rem;
+            }
+            .page-subtitle {
+                font-size: 0.9rem;
+            }
+            .lecturer-profile-hero {
+                padding: 2rem;
+            }
+            .profile-greeting {
+                font-size: 2.25rem;
+            }
+            .profile-tagline {
+                font-size: 1.125rem;
+            }
+            .profile-avatar {
+                width: 90px;
+                height: 90px;
+            }
+            .profile-avatar i {
+                font-size: 3.25rem;
+            }
+            .card {
+                padding: 1.5rem;
+            }
+            .card-header {
+                font-size: 1.15rem;
+            }
+            .list-item {
+                padding: 1rem;
+            }
+            .filter-section {
+                flex-direction: column;  
+                align-items: stretch;
+            }
+            .filter-group {
+                min-width: unset;  
+            }
+            .filter-buttons {
+                flex-direction: column;  
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+<div class="sidebar">
+    <div class="top-section">
+        <div class="user-info">
+            <div>Lecturer</div>
+
+            <div style="color:#f4f7f9" class="user-id" id="lecturerStaffNumber">{{ lecturer.staffNumber }}</div>
+            <div class="user-name" id="lecturerName">{{ lecturer.firstName }} {{ lecturer.lastName }}</div>
+        </div>
+    </div>
+    <nav class="nav-menu">
+        <ul>
+            <li class="nav-item">
+                <a href="#" class="nav-link active" data-section="dashboard">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-section="students">
+                    <i data-lucide="users-round"></i> My Students
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-section="attendance">
+                    <i data-lucide="clipboard-check"></i> Attendance
+                </a>
+            </li>
+            {# Navigation item for Class Sessions #}
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-section="class-sessions">
+                    <i data-lucide="calendar"></i>TimeTable
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div class="logout-button-container">
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="w-full flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-md transition duration-300 ease-in-out shadow-md hover:shadow-lg">
+                <i data-lucide="log-out"></i> Logout
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="main-content-wrapper">
+    <div class="main-content-section" id="dashboard-content" style="display:block;">
+<div class="page-header" style="display: flex; justify-content: center; align-items: center; text-align: center; flex-direction: column; ">
+    <h1 class="page-subtitle" style="color: black;">
+        Welcome , {{ lecturer.firstName }} {{ lecturer.lastName }}
+         Your Dashboard
+    </h1>
+</div>
+
+        <div class="dashboard-cards">
+            <div class="card">
+                <div class="card-header">Total Students</div>
+                <div class="card-content text-center">
+                    <div class="flex items-center justify-center mb-2">
+                        <i data-lucide="users" class="w-10 h-10 text-green-600 mr-3"></i>
+                        <h2 class="text-5xl font-bold text-green-700">{{ enrolled_students|length }}</h2>
+                    </div>
+                    <p class="text-lg text-gray-600">All Student(s).</p>
+                    {% if enrolled_students|length > 0 %}
+                    <p class="text-sm text-green-600 hover:underline cursor-pointer mt-4" onclick="navigateToSection('students')">View student list...</p>
+                    {% endif %}
+                </div>
+            </div>
+            {# Upcoming Class Sessions for Dashboard Overview #}
+           
+<div class="card">
+    <div class="card-header">Upcoming Session</div>
+    <div class="card-content">
+        {% if upcoming_session %}
+            <ul class="space-y-3">
+                <li class="list-item class-session-item flex flex-col sm:flex-row sm:items-center justify-between !p-3">
+                    <div>
+                        <div class="list-item-title text-base">{{ upcoming_session.course.subjectName }} ({{ upcoming_session.course.subjectCode }})</div>
+                        <div class="list-item-meta text-sm">
+                            <p>{{ upcoming_session.date|date:"F d, Y" }} at {{ upcoming_session.time|time:"H:i A" }}</p>
+                            <p>Vanue: {{ upcoming_session.location }}</p>
+                        </div>
+                    </div>
+                
+                </li>
+            </ul>
+        {% else %}
+            <p class="text-center text-gray-500 py-4">No upcoming class sessions scheduled.</p>
+        {% endif %}
+        <div class="mt-6 text-center">
+          
+            <a href="#" onclick="navigateToSection('class-sessions')"  class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition-colors duration-200 shadow-md">
+                <i data-lucide="list" class="w-5 h-5 mr-2"></i> View All Sessions
+            </a>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header font-bold text-lg mb-4 text-gray-800">Quick Actions</div>  
+    <div class="card-content">
+        <ul class="space-y-3">
+            <li>
+                 
+                <a href="{% url 'send_announcement' %}" class="text-blue-600 hover:text-blue-800 hover:underline flex items-center transition-colors duration-200">
+                    <i data-lucide="mail" class="w-5 h-5 mr-2 flex-shrink-0"></i> Send Announcement
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+        </div>
+    </div>
+
+    <div class="main-content-section" id="students-content" style="display:none;">
+        <div class="page-header">
+            <h1 class="page-title">My Students</h1>
+            <p class="page-subtitle">View students enrolled in your Modules</p>
+        </div>
+        {% if enrolled_students %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for student in enrolled_students %}
+            <div class="list-item student-item card !p-4">
+                <div class="list-item-title">{{ student.firstName }} {{ student.lastName }}</div>
+                <div class="list-item-meta">Student Number: {{ student.studentNumber }}</div>
+                <div class="student-courses mt-2">
+                    <strong>Enrolled Courses:</strong>
+                    {% if student.enrolled_courses %}
+                    <ul>
+                        {% for course in student.enrolled_courses|slice:":2" %}
+                        <li>{{ course.subjectName }} ({{ course.subjectCode }})</li>
+                        {% endfor %}
+                        {% if student.enrolled_courses|length > 2 %}
+                        <li>... and {{ student.enrolled_courses|length|add:"-2" }} more.</li>
+                        {% endif %}
+                    </ul>
+                    {% else %}
+                    <p class="text-xs text-gray-500">No courses listed.</p>
+                    {% endif %}
+                </div>
+                   <div class="mt-3">
+                    <a href="#" class="text-sm text-green-600 hover:underline flex items-center"><i data-lucide="user" class="w-4 h-4 mr-1"></i> View Profile</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-content">
+                <p class="text-center text-gray-500 py-8">No students are currently enrolled in your courses.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="main-content-section" id="attendance-content" style="display:none;">
+        <div class="page-header"  >
+            <h1 class="page-title">Attendance Records</h1>
+            <p class="page-subtitle">View and manage attendance records for your students.</p>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="filter-date">Date:</label>
+                <input type="date" id="filter-date" class="form-control">
+            </div>
+            <div class="filter-group">
+                <label for="filter-subject">Subject:</label>
+                <select id="filter-subject" class="form-control">
+                    <option value="">All Subjects</option>
+                    {% for course in courses %}
+                        <option value="{{ course.subjectCode }}">{{ course.subjectName }} ({{ course.subjectCode }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-buttons">
+                <button id="apply-filters" class="btn-primary flex items-center">
+                    <i data-lucide="filter" class="w-5 h-5 mr-2"></i> Apply Filters
+                </button>
+                <button id="download-attendance" class="btn-outline flex items-center">
+                    <i data-lucide="download" class="w-5 h-5 mr-2"></i> Download
+                </button>
+            </div>
+        </div>
+
+        <div class="custom-table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Student Number</th>
+                        <th>Subject</th>
+                        <th>Date & Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="attendance-table-body">
+                    {#  attendance data  #}
+                    {% if attendance_records %}
+ 
+                        {% for record in attendance_records %}
+                        <tr class="attendance-row" data-date="{{ record.dateAndTime|date:'Y-m-d' }}" data-subject="{{ record.subjectCode }}">
+                            <td>{{ record.student_firstName }} {{ record.student_lastName }}</td>
+                            <td>{{ record.student_studentNumber }}</td>
+                            <td>{{ record.subjectCode.subjectName }} ({{ record.subjectCode }})</td>
+                           <td>{{ record.dateAndTime }}</td>
+                            <td>
+                                <span class="status-badge
+                                    {% if record.status == 'Present' %} status-present
+                                    {% elif record.status == 'Absent' %} status-absent
+                                    {% elif record.status == 'Late' %} status-late
+                                    {% else %} status-excused {% endif %}">
+                                    {{ record.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-gray-500 py-4 no-records-row">No attendance records found for the selected filters.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+   {#  Displaying Course Cards #}
+<div class="main-content-section" id="class-sessions-content">  
+    <div class="page-header">
+        <h2 class="page-title">My Modules</h2> 
+        <p class="page-subtitle">Select a Module to view its full session schedule.</p>
+    </div>
+
+     
+    <div class="filter-section !flex-row !justify-end mb-6"> 
+        <div class="filter-buttons !mt-0">
+            <a href="{% url 'add_class_session' %}" class="btn-primary flex items-center">
+                <i data-lucide="calendar-plus" class="w-5 h-5 mr-2"></i> Add New Session
+            </a>
+        </div>
+    </div>
+
+    {#  (unique courses taught by the lecturer) --- #}
+    {% if courses %}  
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for course in courses %}
+            <div class="list-item class-session-item card !p-4">
+                {# Display the Course Name and Code #}
+                <div class="list-item-title">{{ course.subjectName }} ({{ course.subjectCode }})</div>
+ 
+                <div class="mt-3 flex gap-2">
+                    
+                    <a href="{% url 'view_course_sessions' course.subjectCode %}" class="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white text-xs font-semibold rounded-md hover:bg-blue-600 transition-colors duration-200">
+                        <i data-lucide="calendar" class="w-4 h-4 mr-1"></i> View Time Table
+                    </a>
+                 </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-content">
+            <p class="text-center text-gray-500 py-8">You are not assigned to any courses yet.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+</div>
+
+<script>
+   
+    lucide.createIcons();
+
+   
+    document.addEventListener('DOMContentLoaded', function() {
+        const navLinks = document.querySelectorAll('.nav-link');
+        const mainContentSections = document.querySelectorAll('.main-content-section');
+
+        function navigateToSection(sectionId) {
+            navLinks.forEach(link => {
+                if (link.dataset.section === sectionId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            mainContentSections.forEach(section => {
+                if (section.id === sectionId + '-content') {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+
+             if (sectionId === 'attendance') {
+                document.getElementById('filter-date').value = '';
+                document.getElementById('filter-subject').value = '';
+                filterAttendanceRecords();  
+            }
+             if (sectionId === 'class-sessions') {
+                 
+                const sessionItems = document.querySelectorAll('#class-sessions-content .list-item.class-session-item');
+                sessionItems.forEach(item => {
+                    item.style.display = 'flex';  
+                });
+                const noSessionsMessage = document.getElementById('class-sessions-content').querySelector('.no-sessions-message');
+                if (noSessionsMessage) {
+                    noSessionsMessage.style.display = 'none';  
+                }
+            }
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const section = this.dataset.section;
+                navigateToSection(section);
+            });
+        });
+
+        // Function to filter attendance records
+        const applyFiltersButton = document.getElementById('apply-filters');
+        if (applyFiltersButton) {
+            applyFiltersButton.addEventListener('click', filterAttendanceRecords);
+        }
+
+        function filterAttendanceRecords() {
+            const dateFilter = document.getElementById('filter-date').value;
+            const subjectFilter = document.getElementById('filter-subject').value;
+            const attendanceRows = document.querySelectorAll('.attendance-row');
+
+            let foundRecords = false;  
+
+            attendanceRows.forEach(row => {
+                const rowDate = row.dataset.date;
+                const rowSubject = row.dataset.subject;
+
+                const dateMatch = !dateFilter || rowDate === dateFilter;
+                const subjectMatch = !subjectFilter || rowSubject === subjectFilter;
+
+                if (dateMatch && subjectMatch) {
+                    row.style.display = ''; // Show row
+                    foundRecords = true;
+                } else {
+                    row.style.display = 'none'; // Hide row
+                }
+            });
+
+            // Handle "No records found" message for attendance table
+            const attendanceTableBody = document.getElementById('attendance-table-body');
+            let noRecordsRow = attendanceTableBody.querySelector('.no-records-row');  
+
+            // If there are existing rows, but none match filters, and no "no records" message exists
+            if (!foundRecords && attendanceRows.length > 0) { 
+                if (!noRecordsRow) { 
+                    noRecordsRow = document.createElement('tr');  
+                    noRecordsRow.classList.add('no-records-row');
+                    noRecordsRow.innerHTML = '<td colspan="5" class="text-center text-gray-500 py-4">No attendance records found for the selected filters.</td>';
+                    attendanceTableBody.appendChild(noRecordsRow);
+                }
+                noRecordsRow.style.display = '';  
+            } else if (noRecordsRow) { // Hide message if records are found or table was initially empty
+                noRecordsRow.style.display = 'none';
+            }
+        }
+
+        // Function to download attendance as CSV
+        const downloadAttendanceButton = document.getElementById('download-attendance');
+        if (downloadAttendanceButton) {
+            downloadAttendanceButton.addEventListener('click', function() {
+                const table = document.querySelector('#attendance-content .custom-table');
+                let csv = [];
+                // Get table headers
+                const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
+                csv.push(headers.join(','));
+
+                // Get visible table rows (after filtering)
+                const visibleRows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none' && !row.classList.contains('no-records-row'));
+                
+                visibleRows.forEach(row => {
+                    const rowData = Array.from(row.querySelectorAll('td')).map(cell => {
+                        let text = cell.innerText.trim();
+                        // Handle commas and quotes in data
+                        if (text.includes(',') || text.includes('"')) {
+                            text = `"${text.replace(/"/g, '""')}"`;
+                        }
+                        return text;
+                    });
+                    csv.push(rowData.join(','));
+                });
+
+                const csvString = csv.join('\n');
+                const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'attendance_records.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url); // Clean up
+            });
+        }
+
+       
+        window.navigateToSection = navigateToSection;
+
+ 
+
+        
+        navigateToSection('dashboard');
+    });
+</script>
+
+</body>
+</html>
