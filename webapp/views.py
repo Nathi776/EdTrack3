@@ -193,6 +193,19 @@ def student_dashboard(request):
             'lecturer_name': session.lecturer.user.get_full_name() if session.lecturer else 'N/A',
         })
 
+    enrollments = student_profile.enrollments.select_related('course__lecturer__user')
+    lecturer_info = []
+    for enrollment in enrollments:
+        course = enrollment.course
+        lecturer = course.lecturer
+        if lecturer:
+            lecturer_info.append({
+                'course_code': course.course_code,
+                'course_name': course.course_name,
+                'lecturer_name': f"{lecturer.user.first_name} {lecturer.user.last_name}",
+                'lecturer_email': lecturer.user.email,
+            })
+
     context = {
         'student': {
             'firstName': user_data.first_name,
@@ -205,6 +218,7 @@ def student_dashboard(request):
         'subjects': subjects_data,
         'attendance_records': attendance_records_data,
         'class_schedule': class_schedule_data,
+        'lecturer_info': lecturer_info,
     }
 
      
@@ -860,3 +874,22 @@ def download_timetable(request):
     for row in timetable:
         writer.writerow(row)
     return response
+
+@login_required
+def contact_lecturers(request):
+    student = request.user.student_profile  # Get the Student profile for the logged-in user
+    # Get all enrollments for this student
+    enrollments = student.enrollments.select_related('course__lecturer__user')
+    # Build a list of lecturer info for each enrolled course
+    lecturer_info = []
+    for enrollment in enrollments:
+        course = enrollment.course
+        lecturer = course.lecturer
+        if lecturer:
+            lecturer_info.append({
+                'course_code': course.course_code,
+                'course_name': course.course_name,
+                'lecturer_name': f"{lecturer.user.first_name} {lecturer.user.last_name}",
+                'lecturer_email': lecturer.user.email,
+            })
+    return render(request, 'students/contact_lecturers.html', {'lecturer_info': lecturer_info})

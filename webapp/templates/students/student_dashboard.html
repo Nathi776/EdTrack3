@@ -776,12 +776,24 @@
                 </div>
 
                 <div class="custom-card">
-                    <div class="custom-card-header">Quick Links</div>
+                    <div class="custom-card-header">Contact Lecturer</div>
                     <div class="custom-card-content">
                         <ul class="space-y-3">
-                            <li><a href="#" class="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center transition-colors duration-200" onclick="navigateToSection('schedule')"><i class="fas fa-calendar-alt w-5 h-5 mr-2 flex-shrink-0"></i> View Class Schedule</a></li>
-                            <li><a href="#" class="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center transition-colors duration-200"><i class="fas fa-envelope w-5 h-5 mr-2 flex-shrink-0"></i> Contact Lecturer</a></li>
-                         </ul>
+                            {% if lecturer_info %}
+                                {% for item in lecturer_info %}
+                                    <li>
+                                        <span class="font-semibold">{{ item.course_code }} - {{ item.course_name }}</span><br>
+                                        <span>
+                                            <i class="fas fa-user mr-1"></i>
+                                            {{ item.lecturer_name }}
+                                            (<a href="mailto:{{ item.lecturer_email }}" class="text-indigo-600 hover:underline">{{ item.lecturer_email }}</a>)
+                                        </span>
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                <li>No lecturers found for your enrolled modules.</li>
+                            {% endif %}
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -808,12 +820,6 @@
                     <button id="reset-filters" class="btn btn-outline-primary flex items-center">
                         <i class="fas fa-redo mr-2"></i> Reset Filters
                     </button>
-                </div>
-                
-                <div class="filter-buttons">
-                    <a id="download-attendance-link" href="{% url 'download_attendance' %}" class="btn btn-outline-primary flex items-center">
-                        <i class="fas fa-download mr-2"></i> Download Attendance
-                    </a>
                 </div>
             </div>
 
@@ -857,16 +863,7 @@
                     </tbody>
                 </table>
             </div>
-
-            <div class="filter-buttons">
-                <a href="{% url 'download_timetable' %}" class="btn btn-primary flex items-center">
-                    <i class="fas fa-download mr-2"></i> Download Timetable
-                </a>
-            </div>
-
         </div>
-            
-            
     </div>
 
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
@@ -1412,29 +1409,6 @@
             }
             return cookieValue;
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const dateInput = document.getElementById('filter-date');
-            const subjectSelect = document.getElementById('filter-subject');
-            const downloadLink = document.getElementById('download-attendance-link');
-
-            function updateDownloadLink() {
-                const date = dateInput.value;
-                const subject = subjectSelect.value;
-                let url = "{% url 'download_attendance' %}";
-                const params = [];
-                if (date) params.push('date=' + encodeURIComponent(date));
-                if (subject) params.push('subject=' + encodeURIComponent(subject));
-                if (params.length > 0) url += '?' + params.join('&');
-                downloadLink.href = url;
-            }
-
-            dateInput.addEventListener('change', updateDownloadLink);
-            subjectSelect.addEventListener('change', updateDownloadLink);
-
-            // Initialize on page load
-            updateDownloadLink();
-        });
 
     </script>
 </body>
