@@ -1,0 +1,8 @@
+<<h2>Are you sure you want to delete {{ lecturer.firstName }} {{ lecturer.lastName }}?</h2>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Yes, delete</button>
+</form>
+<a href="{% url 'lecturer_list' %}">Cancel</a>
+
+>

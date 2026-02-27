@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer Subjects</title>
+</head>
+<body>
+    <form method="post">
+        {% csrf_token %}
+        <label for="lecturer_id">Lecturer ID:</label>
+        <input type="text" id="lecturer_id" name="lecturer_id" required>
+        
+        <button type="submit">Get Subjects</button>
+    </form>
+</body>
+</html>

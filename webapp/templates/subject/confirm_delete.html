@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Subject</title>
+</head>
+<body>
+    <h2>Are you sure you want to delete subject {{ subject.subjectName }}?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, Delete</button>
+        <a href="{% url 'subject_list' %}">Cancel</a>
+    </form>
+</body>
+</html>

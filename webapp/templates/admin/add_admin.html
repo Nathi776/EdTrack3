@@ -1,0 +1,17 @@
+{% extends 'admin_dashboard.html' %}
+
+{% block main_content %}
+<div class="main-content">
+    <div class="header">Add New Admin</div>
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {% include 'form_template.html' with form=form %}
+                <button type="submit" class="btn btn-primary">Add Admin</button>
+                <a href="{% url 'manage-admins' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

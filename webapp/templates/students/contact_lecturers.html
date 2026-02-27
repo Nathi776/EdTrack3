@@ -1,0 +1,11 @@
+<h2>Your Module Lecturers</h2>
+<ul>
+    {% for item in lecturer_info %}
+        <li>
+            <strong>{{ item.course_code }} - {{ item.course_name }}</strong><br>
+            Lecturer: {{ item.lecturer_name }} (<a href="mailto:{{ item.lecturer_email }}">{{ item.lecturer_email }}</a>)
+        </li>
+    {% empty %}
+        <li>No lecturers found for your enrolled modules.</li>
+    {% endfor %}
+</ul>

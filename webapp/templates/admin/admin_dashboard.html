@@ -1,0 +1,22 @@
+{% extends 'admin_dashboard.html' %}
+
+{% block main_content %}
+<div class="main-content">
+    <div class="header">Manage Admins</div>
+    <a href="{% url 'add_admin' %}" class="btn btn-success mb-3">Add New Admin</a>
+    {% if admins %}
+    <ul class="list-group">
+        {% for admin in admins %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ admin.firstName }} {{ admin.lastName }} ({{ admin.email|default:"N/A" }})
+            <div>
+                <button class="btn btn-danger btn-sm" onclick="confirmDelete('admin', '{{ admin.adminID }}')">Delete</button>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No admins registered.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Subjects List</title>
+</head>
+<body>
+    <h1>Subjects</h1>
+    <a href="{% url 'subject_create' %}">Add New Subject</a>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Subject Code</th>
+                <th>Subject Name</th>
+                <th>Department</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subject in subjects %}
+            <tr>
+                <td>{{ subject.subjectCode }}</td>
+                <td>{{ subject.subjectName }}</td>
+                <td>{{ subject.D_Code.D_Name }}</td>
+                <td>
+                    <a href="{% url 'subject_update' subject.subjectCode %}">Edit</a> |
+                    <a href="{% url 'subject_delete' subject.subjectCode %}">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No subjects available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'home' %}">Back to home</a>
+</body>
+</html>
