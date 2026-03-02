@@ -750,6 +750,30 @@ def enroll_face_api(request):
             return JsonResponse({'error': 'No face detected. Please try again.'}, status=400)
         if enc_result.status == "MULTIPLE_FACES":
             return JsonResponse({'error': 'Multiple faces detected. Ensure only you are in the frame.'}, status=400)
+        
+        # ---- Prevent duplicate face enrollment (same person for multiple students) ----
+        new_enc = np.array(enc_result.encoding, dtype=np.float32)
+
+        # How strict to be: lower = stricter
+        DUPLICATE_THRESHOLD = 0.50  # start here; try 0.48 if still too lenient
+
+        # Compare against every existing enrolled face
+        for fe in FaceEncoding.objects.select_related('student').all():
+            # allow the same student to re-enroll/update their own face
+            if fe.student_id == student.pk:
+                continue
+
+            old_enc = np.array(fe.encoding, dtype=np.float32)
+            dist = np.linalg.norm(old_enc - new_enc)
+
+            if dist < DUPLICATE_THRESHOLD:
+                return JsonResponse(
+                    {
+                        "error": "This face is already enrolled under another student account.",
+                        "distance": float(dist),
+                    },
+                    status=409
+                )
 
         FaceEncoding.objects.update_or_create(
             student=student,
