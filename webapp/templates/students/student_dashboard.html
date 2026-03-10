@@ -1011,7 +1011,8 @@
 
                 this.initEventListeners();
                 this.renderInitialContent();
-                this.checkAndAutoOpenAttendanceModal();  
+                // async call – fire and forget; errors logged
+                this.checkAndAutoOpenAttendanceModal().catch(err => console.error(err));  
             }
 
             initEventListeners() {
@@ -1428,7 +1429,7 @@
                 }
             }
 
-            checkAndAutoOpenAttendanceModal() {
+            async checkAndAutoOpenAttendanceModal() {
                 const now = new Date();
                 const currentDayIndex = now.getDay(); // 0 for Sunday, 1 for Monday, etc.
                 const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -1456,6 +1457,20 @@
                         if (now >= sessionStart && now <= sessionEnd) {
                             this.currentClassNameDisplay.textContent = `${session.course_name} (${session.day_of_week} ${session.start_time})`;
                             this.captureAttendanceButton.dataset.sessionId = session.id;
+
+                            // check with backend whether attendance already exists
+                            try {
+                                const resp = await fetch(`/api/check-attendance/${session.id}/`);
+                                const json = await resp.json();
+                                if (json.already_marked) {
+                                    console.log("Attendance already marked for session", session.id);
+                                    activeSessionFound = true;
+                                    break; // exit loop, no modal
+                                }
+                            } catch (err) {
+                                console.error('Error checking attendance status', err);
+                                // fallback: proceed to open camera
+                            }
 
                             const cameraModal = new bootstrap.Modal(this.cameraAttendanceModalElement);
                             cameraModal.show();

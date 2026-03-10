@@ -33,6 +33,8 @@ urlpatterns = [
     path('api/update-student-profile/', views.update_student_profile_api, name='update_student_profile_api'),
     path('api/enroll-face/', views.enroll_face_api, name='enroll_face_api'),
     path('api/mark-attendance/', views.mark_attendance_api, name='mark_attendance_api'),
+    # helper used by student dashboard JS before opening the attendance modal
+    path('api/check-attendance/<int:session_id>/', views.check_attendance_status, name='check_attendance_status'),
 
     # --- Download timetable and Records ---
     path('student/download-timetable/', views.download_timetable, name='download_timetable'),

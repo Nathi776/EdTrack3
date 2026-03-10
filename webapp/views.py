@@ -815,6 +815,13 @@ def mark_attendance_api(request):
         session = get_object_or_404(ClassSession, pk=session_id)
         student = request.user.student_profile
 
+        # --- Early duplicate guard (frontend will also call separate API) ---
+        if Attendance.objects.filter(student=student, session=session).exists():
+            return JsonResponse({
+                'message': 'Attendance already recorded for this session.',
+                'created': False,
+            })
+
         # --- Decode base64 image ---
         if ';base64,' in image_data_b64:
             fmt, imgstr = image_data_b64.split(';base64,')
@@ -912,6 +919,22 @@ def mark_attendance_api(request):
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 
+# --- API helper for frontend pre-check ---
+@login_required
+@user_passes_test(is_student)
+def check_attendance_status(request, session_id):
+    """Return whether the logged‑in student has already marked attendance.
+
+    The frontend should call this before opening the webcam/modal so that the
+    camera only appears for students who have not yet been recorded.
+    """
+    student = request.user.student_profile
+    exists = Attendance.objects.filter(student=student, session_id=session_id).exists()
+    return JsonResponse({
+        "already_marked": exists
+    })
+
+
 
  
 @login_required
@@ -977,7 +1000,7 @@ def edit_class_session(request, pk):
         form = ClassSessionForm(instance=class_session, lecturer_profile=lecturer_profile)
 
     # 
-    return render(request, 'academics/class_session_form.html', {'form': form, 'class_session': class_session})
+    return render(request, 'lecturers/class_session_form.html', {'form': form, 'class_session': class_session})
 
 
 @login_required
