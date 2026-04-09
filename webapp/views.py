@@ -1,55 +1,28 @@
- 
- 
-from django.core.mail import EmailMultiAlternatives  
+from django import forms
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from django.contrib import messages # For displaying feedback messages
-
- 
- 
+from django.contrib import messages
 from django.db.models import Prefetch, Count, Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.utils import timezone
+from django.core.files.base import ContentFile
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
+from datetime import timedelta, datetime, time
 import base64
 import json
 import numpy as np
 import cv2
-from django.utils import timezone
-from django.core.files.base import ContentFile
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-
+import csv
 
 from .models import User, Student, Lecturer, Course, Enrollment, ClassSession, Attendance, FaceEncoding
 from .face_engine import encode_single_face, match_face
-
 from .forms import (
-    CustomUserCreationForm, StudentForm, LecturerForm, CourseForm,
-    EnrollmentForm, ClassSessionForm, AttendanceForm
+    CustomUserCreationForm, CustomUserChangeForm, StudentForm, LecturerForm, CourseForm,
+    EnrollmentForm, ClassSessionForm, AdminClassSessionForm, AttendanceForm, AnnouncementForm
 )
- 
-from .forms import AnnouncementForm  
- 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Prefetch, Count, Q
-from django.http import JsonResponse
-import base64
-from django.utils import timezone
-from django.core.files.base import ContentFile
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from datetime import timedelta
-from datetime import datetime, time
-from django.utils import timezone
-from .models import User, Student, Lecturer, Course, Enrollment, ClassSession, Attendance, FaceEncoding
-from .forms import (
-    CustomUserCreationForm, StudentForm, LecturerForm, CourseForm,
-    EnrollmentForm, ClassSessionForm, AttendanceForm
-)
-
-import csv
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required, user_passes_test
 
 # --- Helper functions for user type checks ---
 def is_student(user):
@@ -105,9 +78,10 @@ def custom_login_view(request):
                 messages.success(request, f"Welcome, {user.first_name}! You're logged in as a Lecturer.")
                 return redirect('lecturer_dashboard')  
             elif user.user_type == 'Admin':
-                 return redirect('admin:index') # Redirect to Django admin site
+                messages.success(request, f"Welcome, {user.first_name}! You're logged in as an Admin.")
+                return redirect('admin_dashboard')
             else:
-                 return redirect('home') # Fallback for other user types
+                return redirect('home') # Fallback for other user types
 
         else:
             # Authentication failed
@@ -620,11 +594,10 @@ def course_list(request):
         'courses': courses
     }
     
-    return render(request, 'course_list.html', context)
+    return render(request, 'admin/custom_course_list.html', context)
 
 
 @login_required
-# Corrected login_url for the decorator
 @user_passes_test(is_admin, login_url='/webapp/login/')
 def add_course(request):
     """
@@ -635,14 +608,169 @@ def add_course(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Course added successfully!")
-            return redirect('course_list')  
+            return redirect('course_list')
     else:
         form = CourseForm()
     context = {
-        'form': form
+        'form': form,
+        'title': 'Add Course'
     }
-    
-    return render(request, 'add_course.html', context)
+    return render(request, 'admin/custom_course_form.html', context)
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def edit_course(request, course_code):
+    course = get_object_or_404(Course, course_code=course_code)
+    if request.method == 'POST':
+        form = CourseForm(request.POST, instance=course)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Course updated successfully!")
+            return redirect('course_list')
+    else:
+        form = CourseForm(instance=course)
+    return render(request, 'admin/custom_course_form.html', {
+        'form': form,
+        'title': 'Edit Course',
+        'object_name': course.course_code,
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def delete_course(request, course_code):
+    course = get_object_or_404(Course, course_code=course_code)
+    if request.method == 'POST':
+        course.delete()
+        messages.success(request, "Course deleted successfully.")
+        return redirect('course_list')
+    return render(request, 'admin/custom_confirm_delete.html', {
+        'object_name': f"{course.course_code} - {course.course_name}",
+        'object_type': 'course',
+        'cancel_url': 'course_list',
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def classsession_list(request):
+    sessions = ClassSession.objects.select_related('course', 'lecturer__user').all().order_by('day_of_week', 'start_time')
+    return render(request, 'admin/custom_classsession_list.html', {
+        'sessions': sessions,
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def add_class_session_admin(request):
+    if request.method == 'POST':
+        form = AdminClassSessionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Class session created successfully!")
+            return redirect('classsession_list')
+    else:
+        form = AdminClassSessionForm()
+    return render(request, 'admin/custom_classsession_form.html', {
+        'form': form,
+        'title': 'Add Class Session',
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def edit_class_session_admin(request, pk):
+    session = get_object_or_404(ClassSession, pk=pk)
+    if request.method == 'POST':
+        form = AdminClassSessionForm(request.POST, instance=session)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Class session updated successfully!")
+            return redirect('classsession_list')
+    else:
+        form = AdminClassSessionForm(instance=session)
+    return render(request, 'admin/custom_classsession_form.html', {
+        'form': form,
+        'title': 'Edit Class Session',
+        'class_session': session,
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def delete_class_session(request, pk):
+    session = get_object_or_404(ClassSession, pk=pk)
+    if request.method == 'POST':
+        session.delete()
+        messages.success(request, "Class session deleted successfully.")
+        return redirect('classsession_list')
+    return render(request, 'admin/custom_confirm_delete.html', {
+        'object_name': f"{session.course.course_code} on {session.day_of_week} {session.start_time}",
+        'object_type': 'class session',
+        'cancel_url': 'classsession_list',
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def attendance_list(request):
+    records = Attendance.objects.select_related('student__user', 'session__course', 'session__lecturer__user').all().order_by('-date_time')
+    return render(request, 'admin/custom_attendance_list.html', {
+        'records': records,
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def add_attendance(request):
+    if request.method == 'POST':
+        form = AttendanceForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Attendance record created successfully!")
+            return redirect('attendance_list')
+    else:
+        form = AttendanceForm()
+    return render(request, 'admin/custom_attendance_form.html', {
+        'form': form,
+        'title': 'Add Attendance Record',
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def edit_attendance(request, pk):
+    record = get_object_or_404(Attendance, pk=pk)
+    if request.method == 'POST':
+        form = AttendanceForm(request.POST, request.FILES, instance=record)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Attendance record updated successfully!")
+            return redirect('attendance_list')
+    else:
+        form = AttendanceForm(instance=record)
+    return render(request, 'admin/custom_attendance_form.html', {
+        'form': form,
+        'title': 'Edit Attendance Record',
+        'object_name': record.student.user.get_full_name() or record.student.user.username,
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def delete_attendance(request, pk):
+    record = get_object_or_404(Attendance, pk=pk)
+    if request.method == 'POST':
+        record.delete()
+        messages.success(request, "Attendance record deleted successfully.")
+        return redirect('attendance_list')
+    return render(request, 'admin/custom_confirm_delete.html', {
+        'object_name': f"{record.student.user.get_full_name()} - {record.session.course.course_code}",
+        'object_type': 'attendance record',
+        'cancel_url': 'attendance_list',
+    })
+
 
 @login_required
 
@@ -755,7 +883,9 @@ def enroll_face_api(request):
         new_enc = np.array(enc_result.encoding, dtype=np.float32)
 
         # How strict to be: lower = stricter
-        DUPLICATE_THRESHOLD = 0.50  # start here; try 0.48 if still too lenient
+        # face_recognition library typically uses 0.6 as the default threshold
+        # Using 0.40 is very strict (same person must be very similar)
+        DUPLICATE_THRESHOLD = 0.40  # Strict threshold to prevent false positives
 
         # Compare against every existing enrolled face
         for fe in FaceEncoding.objects.select_related('student').all():
@@ -766,7 +896,7 @@ def enroll_face_api(request):
             old_enc = np.array(fe.encoding, dtype=np.float32)
             dist = np.linalg.norm(old_enc - new_enc)
 
-            if dist < DUPLICATE_THRESHOLD:
+            if dist <= DUPLICATE_THRESHOLD:
                 return JsonResponse(
                     {
                         "error": "This face is already enrolled under another student account.",
@@ -1074,3 +1204,303 @@ def contact_lecturers(request):
                 'lecturer_email': lecturer.user.email,
             })
     return render(request, 'students/contact_lecturers.html', {'lecturer_info': lecturer_info})
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def admin_dashboard(request):
+    students = Student.objects.select_related('user').order_by('user__username').all()
+    lecturers = Lecturer.objects.select_related('user').order_by('user__username').all()
+    total_courses = Course.objects.count()
+    total_sessions = ClassSession.objects.count()
+    total_attendance = Attendance.objects.count()
+
+    context = {
+        'total_students': students.count(),
+        'total_lecturers': lecturers.count(),
+        'total_users': User.objects.count(),
+        'total_courses': total_courses,
+        'total_sessions': total_sessions,
+        'total_attendance': total_attendance,
+        'total_enrollments': Enrollment.objects.count(),
+        'students': students,
+        'lecturers': lecturers,
+    }
+    return render(request, 'admin/custom_admin_dashboard.html', context)
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def enrollment_list(request):
+    enrollments = Enrollment.objects.select_related('student__user', 'course__lecturer__user').all().order_by('-enrollment_date')
+    return render(request, 'admin/custom_enrollment_list.html', {
+        'enrollments': enrollments,
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def add_enrollment(request):
+    if request.method == 'POST':
+        form = EnrollmentForm(request.POST)
+        if form.is_valid():
+            student = form.cleaned_data.get('student')
+            course = form.cleaned_data.get('course')
+            if Enrollment.objects.filter(student=student, course=course).exists():
+                form.add_error(None, "This student is already enrolled in the selected course.")
+            else:
+                form.save()
+                messages.success(request, "Enrollment added successfully.")
+                return redirect('enrollment_list')
+    else:
+        form = EnrollmentForm()
+    return render(request, 'admin/custom_enrollment_form.html', {
+        'form': form,
+        'title': 'Add Enrollment',
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def edit_enrollment(request, pk):
+    enrollment = get_object_or_404(Enrollment, pk=pk)
+    if request.method == 'POST':
+        form = EnrollmentForm(request.POST, instance=enrollment)
+        if form.is_valid():
+            student = form.cleaned_data.get('student')
+            course = form.cleaned_data.get('course')
+            if Enrollment.objects.filter(student=student, course=course).exclude(pk=enrollment.pk).exists():
+                form.add_error(None, "This student is already enrolled in the selected course.")
+            else:
+                form.save()
+                messages.success(request, "Enrollment updated successfully.")
+                return redirect('enrollment_list')
+    else:
+        form = EnrollmentForm(instance=enrollment)
+    return render(request, 'admin/custom_enrollment_form.html', {
+        'form': form,
+        'title': 'Edit Enrollment',
+        'object_name': enrollment.student.user.get_full_name(),
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def delete_enrollment(request, pk):
+    enrollment = get_object_or_404(Enrollment, pk=pk)
+    if request.method == 'POST':
+        enrollment.delete()
+        messages.success(request, "Enrollment deleted successfully.")
+        return redirect('enrollment_list')
+    return render(request, 'admin/custom_confirm_delete.html', {
+        'object_name': f"{enrollment.student.user.get_full_name()} - {enrollment.course.course_code}",
+        'object_type': 'enrollment',
+        'cancel_url': 'enrollment_list',
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def enroll_student(request, student_id):
+    """
+    Handles enrolling a student into courses.
+    This is a simplified view; you might want a more complex form for multiple courses.
+    """
+    student = get_object_or_404(Student, pk=student_id)
+    if request.method == 'POST':
+        form = EnrollmentForm(request.POST)
+        form.fields['student'].queryset = Student.objects.filter(pk=student.pk)
+        if form.is_valid():
+            enrollment = form.save(commit=False)
+            enrollment.student = student
+            if not Enrollment.objects.filter(student=student, course=enrollment.course).exists():
+                enrollment.save()
+                messages.success(request, f"Student {student.user.username} enrolled in {enrollment.course.course_name} successfully!")
+                return redirect('enrollment_list')
+            form.add_error(None, "Student is already enrolled in this course.")
+            messages.warning(request, "Student is already enrolled in this course.")
+    else:
+        form = EnrollmentForm(initial={'student': student.pk})
+        form.fields['student'].queryset = Student.objects.filter(pk=student.pk)
+        form.fields['student'].widget = forms.HiddenInput()
+
+    context = {
+        'student': student,
+        'form': form
+    }
+    return render(request, 'admin/custom_enrollment_form.html', context)
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def add_student(request):
+    if request.method == 'POST':
+        post_data = request.POST.copy()
+        post_data['user_type'] = 'Student'
+        user_form = CustomUserCreationForm(post_data, user_type='Student')
+        student_form = StudentForm(request.POST)
+        if 'user_type' in user_form.fields:
+            user_form.fields['user_type'].widget = forms.HiddenInput()
+            user_form.fields['user_type'].initial = 'Student'
+
+        if user_form.is_valid() and student_form.is_valid():
+            user = user_form.save(commit=False)
+            user.user_type = 'Student'
+            user.is_staff = False
+            user.save()
+            student = student_form.save(commit=False)
+            student.user = user
+            student.save()
+            messages.success(request, 'Student account created successfully.')
+            return redirect('admin_dashboard')
+        else:
+            if user_form.errors:
+                messages.error(request, f"User form errors: {user_form.errors.as_json()}")
+            if student_form.errors:
+                messages.error(request, f"Student profile errors: {student_form.errors.as_json()}")
+    else:
+        user_form = CustomUserCreationForm(initial={'user_type': 'Student'})
+        if 'user_type' in user_form.fields:
+            user_form.fields['user_type'].widget = forms.HiddenInput()
+        student_form = StudentForm()
+
+    return render(request, 'admin/custom_student_form.html', {
+        'title': 'Add Student',
+        'user_form': user_form,
+        'profile_form': student_form,
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def edit_student(request, username):
+    user = get_object_or_404(User, username=username, user_type='Student')
+    student_profile = get_object_or_404(Student, user=user)
+
+    if request.method == 'POST':
+        post_data = request.POST.copy()
+        post_data['user_type'] = 'Student'
+        user_form = CustomUserChangeForm(post_data, instance=user, user_type='Student')
+        student_form = StudentForm(request.POST, instance=student_profile)
+        if 'user_type' in user_form.fields:
+            user_form.fields['user_type'].widget = forms.HiddenInput()
+            user_form.fields['user_type'].initial = 'Student'
+
+        if user_form.is_valid() and student_form.is_valid():
+            user_form.save()
+            student_form.save()
+            messages.success(request, 'Student profile updated successfully.')
+            return redirect('admin_dashboard')
+    else:
+        user_form = CustomUserChangeForm(instance=user)
+        if 'user_type' in user_form.fields:
+            user_form.fields['user_type'].widget = forms.HiddenInput()
+        student_form = StudentForm(instance=student_profile)
+
+    return render(request, 'admin/custom_student_form.html', {
+        'title': 'Edit Student',
+        'user_form': user_form,
+        'profile_form': student_form,
+        'object_name': user.get_full_name() or user.username,
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def delete_student(request, username):
+    user = get_object_or_404(User, username=username, user_type='Student')
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, 'Student account has been deleted.')
+        return redirect('admin_dashboard')
+
+    return render(request, 'admin/custom_confirm_delete.html', {
+        'object_name': user.get_full_name() or user.username,
+        'object_type': 'student',
+        'cancel_url': 'admin_dashboard',
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def add_lecturer(request):
+    if request.method == 'POST':
+        post_data = request.POST.copy()
+        post_data['user_type'] = 'Lecturer'
+        user_form = CustomUserCreationForm(post_data, user_type='Lecturer')
+        lecturer_form = LecturerForm(request.POST)
+        if 'user_type' in user_form.fields:
+            user_form.fields['user_type'].widget = forms.HiddenInput()
+            user_form.fields['user_type'].initial = 'Lecturer'
+
+        if user_form.is_valid() and lecturer_form.is_valid():
+            user = user_form.save(commit=False)
+            user.user_type = 'Lecturer'
+            user.is_staff = False
+            user.save()
+            lecturer = lecturer_form.save(commit=False)
+            lecturer.user = user
+            lecturer.save()
+            messages.success(request, 'Lecturer account created successfully.')
+            return redirect('admin_dashboard')
+    else:
+        user_form = CustomUserCreationForm(initial={'user_type': 'Lecturer'})
+        if 'user_type' in user_form.fields:
+            user_form.fields['user_type'].widget = forms.HiddenInput()
+        lecturer_form = LecturerForm()
+
+    return render(request, 'admin/custom_lecturer_form.html', {
+        'title': 'Add Lecturer',
+        'user_form': user_form,
+        'profile_form': lecturer_form,
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def edit_lecturer(request, username):
+    user = get_object_or_404(User, username=username, user_type='Lecturer')
+    lecturer_profile = get_object_or_404(Lecturer, user=user)
+
+    if request.method == 'POST':
+        post_data = request.POST.copy()
+        post_data['user_type'] = 'Lecturer'
+        user_form = CustomUserChangeForm(post_data, instance=user, user_type='Lecturer')
+        lecturer_form = LecturerForm(request.POST, instance=lecturer_profile)
+        if 'user_type' in user_form.fields:
+            user_form.fields['user_type'].widget = forms.HiddenInput()
+            user_form.fields['user_type'].initial = 'Lecturer'
+
+        if user_form.is_valid() and lecturer_form.is_valid():
+            user_form.save()
+            lecturer_form.save()
+            messages.success(request, 'Lecturer profile updated successfully.')
+            return redirect('admin_dashboard')
+    else:
+        user_form = CustomUserChangeForm(instance=user)
+        if 'user_type' in user_form.fields:
+            user_form.fields['user_type'].widget = forms.HiddenInput()
+        lecturer_form = LecturerForm(instance=lecturer_profile)
+
+    return render(request, 'admin/custom_lecturer_form.html', {
+        'title': 'Edit Lecturer',
+        'user_form': user_form,
+        'profile_form': lecturer_form,
+        'object_name': user.get_full_name() or user.username,
+    })
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/webapp/login/')
+def delete_lecturer(request, username):
+    user = get_object_or_404(User, username=username, user_type='Lecturer')
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, 'Lecturer account has been deleted.')
+        return redirect('admin_dashboard')
+
+    return render(request, 'admin/custom_confirm_delete.html', {
+        'object_name': user.get_full_name() or user.username,
+        'object_type': 'lecturer',
+        'cancel_url': 'admin_dashboard',
+    })

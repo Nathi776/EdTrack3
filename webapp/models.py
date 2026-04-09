@@ -56,6 +56,10 @@ class Student(models.Model):
     def email(self):
         return self.user.email
 
+    @property
+    def studentNumber(self):
+        return self.user.username
+
     class Meta:
         verbose_name = _('student')
         verbose_name_plural = _('students')
@@ -87,6 +91,10 @@ class Lecturer(models.Model):
     @property
     def email(self):
         return self.user.email
+
+    @property
+    def staffNumber(self):
+        return self.user.username
 
     class Meta:
         verbose_name = _('lecturer')

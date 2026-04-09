@@ -42,13 +42,17 @@ class CustomUserCreationForm(UserCreationForm):
     """
     class Meta:
         model = User
- 
+
         fields = ('username', 'email', 'first_name', 'last_name', 'user_type')
 
     def __init__(self, *args, **kwargs):
+        user_type = kwargs.pop('user_type', None)
         super().__init__(*args, **kwargs)
-       
-        pass
+        if 'user_type' in self.fields:
+            self.fields['user_type'].widget = forms.HiddenInput()
+            if user_type is not None:
+                self.fields['user_type'].initial = user_type
+
 
 class CustomUserChangeForm(UserChangeForm):
     """
@@ -61,9 +65,12 @@ class CustomUserChangeForm(UserChangeForm):
         fields = '__all__'  
 
     def __init__(self, *args, **kwargs):
+        user_type = kwargs.pop('user_type', None)
         super().__init__(*args, **kwargs)
-      
-        pass
+        if 'user_type' in self.fields:
+            self.fields['user_type'].widget = forms.HiddenInput()
+            if user_type is not None:
+                self.fields['user_type'].initial = user_type
 
 
 # --- 2. Student Form ---
@@ -172,13 +179,34 @@ class ClassSessionForm(forms.ModelForm):
         }
  
     def __init__(self, *args, **kwargs):
-        #  
         self.lecturer_profile = kwargs.pop('lecturer_profile', None)
         super().__init__(*args, **kwargs)
 
- 
         if self.lecturer_profile:
-             self.fields['course'].queryset = Course.objects.filter(lecturer=self.lecturer_profile)
+            self.fields['course'].queryset = Course.objects.filter(lecturer=self.lecturer_profile)
+
+
+class AdminClassSessionForm(forms.ModelForm):
+    """
+    Admin-facing form for class sessions with lecturer selection.
+    """
+    class Meta:
+        model = ClassSession
+        fields = '__all__'
+        labels = {
+            'course': 'Course',
+            'lecturer': 'Lecturer',
+            'day_of_week': 'Day of Week',
+            'start_time': 'Start Time',
+            'end_time': 'End Time',
+        }
+        widgets = {
+            'day_of_week': forms.Select(choices=ClassSession.day_of_week.field.choices),
+            'start_time': forms.TimeInput(attrs={'type': 'time'}),
+            'end_time': forms.TimeInput(attrs={'type': 'time'}),
+            'room': forms.TextInput(attrs={'placeholder': 'e.g., Room A101, Zoom Link'}),
+        }
+
 
 # --- 7. Attendance Form ---
 class AttendanceForm(forms.ModelForm):
